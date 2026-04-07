@@ -183,7 +183,52 @@ describe('processPayment', () => {
   });
 
   // ── PAYOFF ────────────────────────────────────────────────────────────────────
-  it('PAYOFF — préstamo queda COMPLETED y balance en 0', async () => {
+  it('PAYOFF — préstamo queda COMPLETED, balance en 0 y todas las cuotas pagadas', async () => {
+    db.loan.findUnique.mockResolvedValue({
+      ...baseLoan,
+      numberOfPayments: 12,
+      outstandingBalance: '30000.00',
+      totalPaid: '120000.00',
+    });
+    db.loan.update.mockResolvedValue({
+      ...baseLoan,
+      outstandingBalance: '0.00',
+      status: 'COMPLETED',
+      paidPayments: 12,
+    });
+
+    // Mock para cuotas pendientes que se marcarán como pagadas
+    db.paymentSchedule.findMany.mockResolvedValue([
+      { id: 'pending-1', amountDue: '5000.00' },
+      { id: 'pending-2', amountDue: '5000.00' },
+    ]);
+
+    const result = await processPayment(baseInput, db);
+
+    expect(result.paymentType).toBe('PAYOFF');
+
+    // Verificar que el préstamo se marca como COMPLETED con paidPayments = numberOfPayments
+    const loanUpdate = db.loan.update.mock.calls[0][0];
+    expect(loanUpdate.data.status).toBe('COMPLETED');
+    expect(loanUpdate.data.outstandingBalance).toBe('0.00');
+    expect(loanUpdate.data.paidPayments).toBe(12); // numberOfPayments (progreso 100%)
+    expect(loanUpdate.data.moraAmount).toBe('0.00'); // Mora eliminada en PAYOFF
+
+    // Verificar que se marcaron todas las cuotas pendientes como pagadas (no restructuradas)
+    expect(db.paymentSchedule.update).toHaveBeenCalledTimes(3); // cuota actual + 2 pendientes
+    expect(db.paymentSchedule.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'pending-1' },
+        data: expect.objectContaining({
+          isPaid: true,
+          amountPaid: '5000.00',
+          isRestructured: false,
+        }),
+      }),
+    );
+  });
+
+  it('PAYOFF — paymentType persiste como PAYOFF en el registro de pago creado', async () => {
     db.loan.findUnique.mockResolvedValue({
       ...baseLoan,
       outstandingBalance: '30000.00',
@@ -193,17 +238,68 @@ describe('processPayment', () => {
       ...baseLoan,
       outstandingBalance: '0.00',
       status: 'COMPLETED',
+      paidPayments: baseLoan.numberOfPayments,
     });
+    db.paymentSchedule.findMany.mockResolvedValue([]);
 
-    const result = await processPayment(baseInput, db);
+    await processPayment(baseInput, db);
+
+    const createCall = db.payment.create.mock.calls[0][0];
+    expect(createCall.data.paymentType).toBe('PAYOFF');
+  });
+
+  it('PAYOFF con mora — mora cubre parte del saldo y se clasifica PAYOFF correctamente', async () => {
+    // outstandingBalance=30000, mora=10000 — el cliente paga exactamente 30000
+    db.loan.findUnique.mockResolvedValue({
+      ...baseLoan,
+      outstandingBalance: '30000.00',
+      moraAmount: '10000.00',
+      totalAmount: '30000.00',
+      totalPaid: '0.00',
+    });
+    db.loan.update.mockResolvedValue({
+      ...baseLoan,
+      outstandingBalance: '0.00',
+      status: 'COMPLETED',
+      paidPayments: baseLoan.numberOfPayments,
+    });
+    db.paymentSchedule.findMany.mockResolvedValue([]);
+
+    const result = await processPayment({ ...baseInput, amountPaid: 30000 }, db);
 
     expect(result.paymentType).toBe('PAYOFF');
     const loanUpdate = db.loan.update.mock.calls[0][0];
     expect(loanUpdate.data.status).toBe('COMPLETED');
     expect(loanUpdate.data.outstandingBalance).toBe('0.00');
-    expect(db.paymentSchedule.updateMany).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { isRestructured: true } }),
-    );
+  });
+
+  it('PAYOFF — no actualiza dos veces la cuota actual (id excluido del findMany)', async () => {
+    db.loan.findUnique.mockResolvedValue({
+      ...baseLoan,
+      outstandingBalance: '30000.00',
+      totalPaid: '120000.00',
+    });
+    db.loan.update.mockResolvedValue({
+      ...baseLoan,
+      outstandingBalance: '0.00',
+      status: 'COMPLETED',
+      paidPayments: baseLoan.numberOfPayments,
+    });
+    // findMany retorna vacío: la cuota actual ya fue excluida con id: { not: schedule.id }
+    db.paymentSchedule.findMany.mockResolvedValue([]);
+
+    await processPayment(baseInput, db);
+
+    // Solo 1 update: la cuota actual; el findMany no devolvió duplicados
+    expect(db.paymentSchedule.update).toHaveBeenCalledTimes(1);
+
+    // Verificar que el WHERE del findMany excluye la cuota actual
+    const findManyCall = db.paymentSchedule.findMany.mock.calls[0][0];
+    expect(findManyCall.where).toMatchObject({
+      loanId: LOAN_ID,
+      isPaid: false,
+      id: { not: SCHEDULE_ID },
+    });
   });
 
   // ── Opcionales ────────────────────────────────────────────────────────────────

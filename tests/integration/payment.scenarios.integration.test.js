@@ -252,9 +252,17 @@ describe('Escenario 3 — Pago PAYOFF (liquidación total)', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     db = makeDb({
+      numberOfPayments: 12,
       outstandingBalance: '30000.00',
       totalPaid: '120000.00',
     });
+
+    // Mock cuotas pendientes para marcar como pagadas
+    db.paymentSchedule.findMany.mockResolvedValue([
+      { id: 'pending-1', amountDue: '15000.00' },
+      { id: 'pending-2', amountDue: '15000.00' },
+    ]);
+
     result = await processPayment({ ...BASE_INPUT, amountPaid: 35000 }, db);
   });
 
@@ -277,14 +285,45 @@ describe('Escenario 3 — Pago PAYOFF (liquidación total)', () => {
     expect(loanUpdateCall.data.totalPaid).toBe('150000.00');
   });
 
+  it('ajusta paidPayments = numberOfPayments para progreso 100%', () => {
+    const loanUpdateCall = db.loan.update.mock.calls[0][0];
+    expect(loanUpdateCall.data.paidPayments).toBe(12); // numberOfPayments
+  });
+
+  it('elimina toda la mora pendiente en PAYOFF', () => {
+    const loanUpdateCall = db.loan.update.mock.calls[0][0];
+    expect(loanUpdateCall.data.moraAmount).toBe('0.00');
+  });
+
   it('registra actualEndDate', () => {
     const loanUpdateCall = db.loan.update.mock.calls[0][0];
     expect(loanUpdateCall.data.actualEndDate).toBeDefined();
   });
 
-  it('marca cuotas restantes como isRestructured=true', () => {
-    expect(db.paymentSchedule.updateMany).toHaveBeenCalledWith(
-      expect.objectContaining({ data: { isRestructured: true } }),
+  it('marca todas las cuotas pendientes como isPaid=true (no restructuradas)', () => {
+    // Debe actualizarse la cuota actual (1 call) + las 2 pendientes (2 calls adicionales)
+    expect(db.paymentSchedule.update).toHaveBeenCalledTimes(3);
+
+    // Verificar que las cuotas pendientes se marcan como pagadas
+    expect(db.paymentSchedule.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'pending-1' },
+        data: expect.objectContaining({
+          isPaid: true,
+          amountPaid: '15000.00',
+          isRestructured: false,
+        }),
+      }),
+    );
+    expect(db.paymentSchedule.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'pending-2' },
+        data: expect.objectContaining({
+          isPaid: true,
+          amountPaid: '15000.00',
+          isRestructured: false,
+        }),
+      }),
     );
   });
 

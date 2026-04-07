@@ -24,6 +24,7 @@ const mockPaymentCount = jest.fn();
 const mockBcryptCompare = jest.fn();
 const mockGpsDeleteMany = jest.fn();
 const mockEnqueuePaymentReceipt = jest.fn();
+const mockRegisterAdminPayment = jest.fn();
 const mockPrismaTransaction = jest.fn((actions) => Promise.all(actions));
 
 jest.unstable_mockModule('../../src/services/admin.service.js', () => ({
@@ -102,6 +103,10 @@ jest.unstable_mockModule('../../src/services/notification.service.js', () => ({
   enqueuePaymentReceipt: mockEnqueuePaymentReceipt,
 }));
 
+jest.unstable_mockModule('../../src/services/payment.service.js', () => ({
+  registerAdminPayment: mockRegisterAdminPayment,
+}));
+
 const {
   getLogin,
   postLogin,
@@ -119,6 +124,7 @@ const {
   getReports,
   getPayments,
   getSettings,
+  createPayment,
 } = await import('../../src/controllers/admin.controller.js');
 
 // --- Fixtures ---
@@ -1294,5 +1300,133 @@ describe('getSettings', () => {
       user: req.user,
       currentPath: '/admin/settings',
     });
+  });
+});
+
+// ============================================
+// createPayment
+// ============================================
+describe('createPayment', () => {
+  const LOAN_ID = 'loan-aaa-111';
+  const COLLECTOR_ID = 'coll-bbb-222';
+  const PAYMENT_ID = 'pay-ccc-333';
+
+  const validBody = {
+    loanId: LOAN_ID,
+    amountPaid: '30000',
+    paymentDate: '2026-04-07',
+    collectorId: COLLECTOR_ID,
+    paymentMethod: 'CASH',
+    notes: '',
+  };
+
+  const baseResult = {
+    payment: {
+      id: PAYMENT_ID,
+      amount: '30000.00',
+      moraAmount: '0.00',
+      totalReceived: '30000.00',
+      collectedAt: new Date('2026-04-07T10:00:00Z'),
+      paymentType: 'FULL',
+    },
+    loan: {
+      id: LOAN_ID,
+      outstandingBalance: '120000.00',
+      paidPayments: 2,
+      numberOfPayments: 5,
+      status: 'ACTIVE',
+    },
+    clientName: 'Juan Pérez',
+    paymentType: 'FULL',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockEnqueuePaymentReceipt.mockResolvedValue(undefined);
+  });
+
+  it('redirige a /admin/payments/new si faltan campos requeridos', async () => {
+    const req = createReq({ body: { loanId: LOAN_ID } });
+    const res = createRes();
+
+    await createPayment(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith('/admin/payments/new');
+    expect(req.session.flashError).toBeDefined();
+  });
+
+  it('pago FULL — redirige a /admin/payments con flash genérico', async () => {
+    mockRegisterAdminPayment.mockResolvedValue(baseResult);
+    const req = createReq({ body: validBody, app: { get: () => null } });
+    const res = createRes();
+
+    await createPayment(req, res);
+
+    expect(mockRegisterAdminPayment).toHaveBeenCalledTimes(1);
+    expect(res.redirect).toHaveBeenCalledWith('/admin/payments');
+    expect(req.session.flashSucess).toBe('Pago registrado exitosamente');
+  });
+
+  it('PAYOFF — flash indica liquidación y nombre del cliente', async () => {
+    const payoffResult = {
+      ...baseResult,
+      payment: { ...baseResult.payment, paymentType: 'PAYOFF' },
+      loan: {
+        ...baseResult.loan,
+        outstandingBalance: '0.00',
+        paidPayments: 5,
+        status: 'COMPLETED',
+      },
+      paymentType: 'PAYOFF',
+    };
+    mockRegisterAdminPayment.mockResolvedValue(payoffResult);
+    const req = createReq({ body: validBody, app: { get: () => null } });
+    const res = createRes();
+
+    await createPayment(req, res);
+
+    expect(req.session.flashSucess).toMatch(/Liquidación/);
+    expect(req.session.flashSucess).toMatch(/Juan Pérez/);
+    expect(res.redirect).toHaveBeenCalledWith('/admin/payments');
+  });
+
+  it('PAYOFF — emite evento payment:created con paymentType y paidPayments al socket', async () => {
+    const payoffResult = {
+      ...baseResult,
+      payment: { ...baseResult.payment, paymentType: 'PAYOFF' },
+      loan: {
+        ...baseResult.loan,
+        outstandingBalance: '0.00',
+        paidPayments: 5,
+        status: 'COMPLETED',
+      },
+      paymentType: 'PAYOFF',
+    };
+    mockRegisterAdminPayment.mockResolvedValue(payoffResult);
+
+    const mockEmit = jest.fn();
+    const req = createReq({ body: validBody, app: { get: () => ({ emit: mockEmit }) } });
+    const res = createRes();
+
+    await createPayment(req, res);
+
+    expect(mockEmit).toHaveBeenCalledWith(
+      'payment:created',
+      expect.objectContaining({
+        paymentType: 'PAYOFF',
+        outstandingBalance: '0.00',
+        paidPayments: 5,
+        status: 'COMPLETED',
+      }),
+    );
+  });
+
+  it('sin io — no lanza error aunque req.app.get retorna null', async () => {
+    mockRegisterAdminPayment.mockResolvedValue(baseResult);
+    const req = createReq({ body: validBody, app: { get: () => null } });
+    const res = createRes();
+
+    await expect(createPayment(req, res)).resolves.not.toThrow();
+    expect(res.redirect).toHaveBeenCalledWith('/admin/payments');
   });
 });

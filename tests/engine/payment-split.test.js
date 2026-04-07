@@ -1,11 +1,14 @@
 import { describe, it, expect } from '@jest/globals';
 import Decimal from 'decimal.js';
-import {
+
+// Import modules without mocking for these tests since we need actual date functionality
+const {
   splitPayment,
   classifyPayment,
   nextPeriodDate,
   buildRestructuredSchedule,
-} from '../../src/engine/payment-split.js';
+  applyEarlyPaymentForgiveness,
+} = await import('../../src/engine/payment-split.js');
 
 // ============================================================
 // splitPayment
@@ -127,6 +130,25 @@ describe('classifyPayment', () => {
     // outstanding=30000, pago=30000 (interés=10000 + capital=20000)
     const split = splitPayment(30000, 0, 10000, 20000);
     const type = classifyPayment(split, 10000, 20000, 30000);
+    expect(type).toBe('PAYOFF');
+  });
+
+  it('PAYOFF con mora — mora + resto del pago cubre el saldo total aunque no cubra interés', () => {
+    // Escenario: préstamo con outstandingBalance=15000, mora=10000.
+    // El cliente paga 15000: va 10000 a mora y 5000 a interés (pero interestDue=8000).
+    // interestApplied (5000) < interestDue (8000) → antes del fix retornaba PARTIAL_INTEREST.
+    // Con el fix: mora(10000) + interés(5000) = 15000 >= outstandingBalance(15000) → PAYOFF.
+    const split = splitPayment(15000, 10000, 8000, 20000);
+    const type = classifyPayment(split, 8000, 20000, 15000);
+    expect(type).toBe('PAYOFF');
+  });
+
+  it('PAYOFF con mora — no confunde con PARTIAL_INTEREST cuando totalApplied cubre el saldo', () => {
+    // Saldo pendiente=5000, mora=3000, pago=5000.
+    // split: moraApplied=3000, interestApplied=2000, pero interestDue=4000.
+    // Sin fix → PARTIAL_INTEREST. Con fix → PAYOFF porque 3000+2000=5000 >= 5000.
+    const split = splitPayment(5000, 3000, 4000, 10000);
+    const type = classifyPayment(split, 4000, 10000, 5000);
     expect(type).toBe('PAYOFF');
   });
 });
@@ -300,5 +322,124 @@ describe('buildRestructuredSchedule', () => {
     expect(result[0].amountDue).toBe('5000.00');
     expect(result[0].principalDue).toBe('3000.00');
     expect(result[0].interestDue).toBe('2000.00');
+  });
+});
+
+// ============================================================
+// applyEarlyPaymentForgiveness
+// ============================================================
+
+describe('applyEarlyPaymentForgiveness', () => {
+  it('aplica condonación para préstamos MONTHLY con pago anticipado ≥30 días', () => {
+    const paymentDate = '2026-01-05'; // 31 días antes
+    const dueDate = '2026-02-05';
+    const frequency = 'MONTHLY';
+
+    const split = {
+      moraApplied: '0.00',
+      interestApplied: '125.00',
+      principalApplied: '375.00',
+      excess: '500.00',
+    };
+
+    const principalDue = '375.00';
+
+    const result = applyEarlyPaymentForgiveness(
+      paymentDate,
+      dueDate,
+      frequency,
+      split,
+      principalDue,
+    );
+
+    expect(result.interestApplied).toBe('0.00');
+    expect(result.principalApplied).toBe('500.00'); // 375 + 125 condonado
+    expect(result.forgivenInterest).toBe('125.00');
+    expect(result.isEarlyPayment).toBe(true);
+    expect(result.excess).toBe('500.00');
+  });
+
+  it('no aplica condonación para préstamos no MONTHLY', () => {
+    const paymentDate = '2026-01-05';
+    const dueDate = '2026-02-05';
+    const frequency = 'DAILY'; // No MONTHLY
+
+    const split = {
+      moraApplied: '0.00',
+      interestApplied: '125.00',
+      principalApplied: '375.00',
+      excess: '500.00',
+    };
+
+    const principalDue = '375.00';
+
+    const result = applyEarlyPaymentForgiveness(
+      paymentDate,
+      dueDate,
+      frequency,
+      split,
+      principalDue,
+    );
+
+    // El split debe retornarse sin modificaciones
+    expect(result).toEqual(split);
+    expect(result.isEarlyPayment).toBeUndefined();
+    expect(result.forgivenInterest).toBeUndefined();
+  });
+
+  it('no aplica condonación cuando el pago es <30 días anticipado', () => {
+    const paymentDate = '2026-01-20'; // Solo 16 días antes
+    const dueDate = '2026-02-05';
+    const frequency = 'MONTHLY';
+
+    const split = {
+      moraApplied: '0.00',
+      interestApplied: '125.00',
+      principalApplied: '375.00',
+      excess: '500.00',
+    };
+
+    const principalDue = '375.00';
+
+    const result = applyEarlyPaymentForgiveness(
+      paymentDate,
+      dueDate,
+      frequency,
+      split,
+      principalDue,
+    );
+
+    // El split debe retornarse sin modificaciones
+    expect(result).toEqual(split);
+    expect(result.isEarlyPayment).toBeUndefined();
+    expect(result.forgivenInterest).toBeUndefined();
+  });
+
+  it('no aplica condonación cuando el pago no cubre el principal completo', () => {
+    const paymentDate = '2026-01-05'; // 31 días antes
+    const dueDate = '2026-02-05';
+    const frequency = 'MONTHLY';
+
+    const split = {
+      moraApplied: '0.00',
+      interestApplied: '125.00',
+      principalApplied: '200.00', // Menos que el principal debido
+      excess: '0.00',
+    };
+
+    const principalDue = '375.00'; // Requiere más capital del que se aplicó
+
+    const result = applyEarlyPaymentForgiveness(
+      paymentDate,
+      dueDate,
+      frequency,
+      split,
+      principalDue,
+    );
+
+    // El split debe retornarse sin modificaciones
+    expect(result).toEqual(split);
+    expect(result.isEarlyPayment).toBeUndefined();
+    expect(result.forgivenInterest).toBeUndefined();
   });
 });
