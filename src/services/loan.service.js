@@ -77,6 +77,8 @@ export const findLoanById = async (id, organizationId) => {
         select: { id: true, firstName: true, lastName: true, phone: true },
       },
       paymentSchedule: {
+        // Excluir cuotas reemplazadas por restructuración — solo mostrar el cronograma vigente
+        where: { isRestructured: false },
         orderBy: { installmentNumber: 'asc' },
         select: {
           id: true,

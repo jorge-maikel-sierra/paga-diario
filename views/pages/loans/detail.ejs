@@ -271,15 +271,12 @@ if (loan.status === 'COMPLETED') {
 
     <%
       /**
-       * Leyenda de invariantes financieros (visible solo para admins en modo debug).
-       * Validar: totalPaid + outstandingBalance ≈ totalAmount
-       *          interestPaid + sum(pending interestDue) ≈ totalInterest
-       *          count(active pending) === numberOfPayments - paidPayments
+       * Invariante financiero: totalPaid + outstandingBalance ≈ totalAmount
+       *
+       * outstandingBalance = totalAmount - totalPaid en todos los tipos de pago.
+       * Una diferencia > $1 indica inconsistencia en la BD (ej: migración manual
+       * incorrecta o bug en el engine de pagos).
        */
-      const totalInterest = parseFloat(loan.totalAmount) - parseFloat(loan.principalAmount);
-      const pendingInterestSum = activeSched
-        .filter(s => !s.isPaid)
-        .reduce((acc, s) => acc + parseFloat(s.interestDue), 0);
       const balanceCheck = Math.abs(
         (parseFloat(loan.totalPaid) + parseFloat(loan.outstandingBalance)) - parseFloat(loan.totalAmount)
       ) < 1;
@@ -377,8 +374,8 @@ if (loan.status === 'COMPLETED') {
       <% if (!balanceCheck) { %>
         <div class="px-5 py-3 bg-red-50 border-t border-red-200">
           <p class="text-xs font-medium text-red-700">
-            ⚠ Inconsistencia detectada: totalPaid + outstandingBalance ≠ totalAmount.
-            Contacta al soporte técnico.
+            ⚠ Inconsistencia detectada: el saldo pendiente no coincide con el capital
+            del cronograma activo. Contacta al soporte técnico.
           </p>
         </div>
       <% } %>

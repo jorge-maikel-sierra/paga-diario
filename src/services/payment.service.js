@@ -135,9 +135,14 @@ const processPayment = async (input, tx) => {
     schedule.principalDue,
   );
 
+  // Cuando hay condonación de interés, el interés efectivo a cubrir es 0 (ya fue perdonado).
+  // Pasamos ese valor a classifyPayment para que no interprete el interestApplied=0
+  // como un pago insuficiente (PARTIAL_INTEREST) cuando en realidad el interés fue condonado.
+  const effectiveInterestDue = split.isEarlyPayment ? '0.00' : schedule.interestDue;
+
   const paymentType = classifyPayment(
     split,
-    schedule.interestDue,
+    effectiveInterestDue,
     schedule.principalDue,
     loan.outstandingBalance,
   );
@@ -214,9 +219,12 @@ const processPayment = async (input, tx) => {
       0,
     );
 
-    // Reducir el saldo pendiente solo por lo que efectivamente se aplicó a capital
+    // Reducir el saldo pendiente por el monto total aplicado (capital + interés),
+    // igual que en FULL, para mantener la invariante outstandingBalance = totalAmount - totalPaid.
     const newOutstanding = Decimal.max(
-      new Decimal(loan.outstandingBalance).minus(split.principalApplied),
+      new Decimal(loan.outstandingBalance)
+        .minus(split.principalApplied)
+        .minus(split.interestApplied),
       0,
     );
 
@@ -298,9 +306,9 @@ const processPayment = async (input, tx) => {
       },
     });
 
-    // Cuotas pendientes que serán reemplazadas
+    // Cuotas pendientes a reemplazar: excluir la cuota actual (ya marcada pagada arriba)
     const pendingSchedules = await db.paymentSchedule.findMany({
-      where: { loanId, isPaid: false, isRestructured: false },
+      where: { loanId, isPaid: false, isRestructured: false, id: { not: schedule.id } },
       orderBy: { installmentNumber: 'asc' },
     });
 
@@ -319,7 +327,15 @@ const processPayment = async (input, tx) => {
       );
 
       const totalInterest = new Decimal(loan.totalAmount).minus(loan.principalAmount);
-      const remainingInterest = Decimal.max(totalInterest.minus(newInterestPaid), 0);
+
+      // El interés condonado por pago anticipado debe contarse como "cubierto" para
+      // no inflar el remainingInterest y evitar que buildRestructuredSchedule genere
+      // más cuotas de las necesarias.
+      const forgivenInterest = new Decimal(split.forgivenInterest ?? '0');
+      const remainingInterest = Decimal.max(
+        totalInterest.minus(newInterestPaid).minus(forgivenInterest),
+        0,
+      );
       const remainingCapital = Decimal.max(newOutstandingBalance.minus(remainingInterest), 0);
 
       const newInstallments = buildRestructuredSchedule({

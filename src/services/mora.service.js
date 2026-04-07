@@ -32,7 +32,7 @@ export const calculateAndUpdateLoanMora = async (loanId) =>
         id: true,
         interestRate: true,
         paymentSchedule: {
-          where: { isPaid: false },
+          where: { isPaid: false, isRestructured: false },
           select: {
             id: true,
             dueDate: true,
@@ -116,6 +116,7 @@ export const findActiveLoansWithOverdueSchedules = async (organizationId) => {
       paymentSchedule: {
         some: {
           isPaid: false,
+          isRestructured: false,
           dueDate: { lt: today },
         },
       },
