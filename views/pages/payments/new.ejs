@@ -241,6 +241,10 @@ function todayISO() {
             <dt class="text-gray-500">Saldo total préstamo</dt>
             <dd id="inst-outstanding" class="font-semibold text-gray-800 tabular-nums">—</dd>
           </div>
+          <div class="flex justify-between px-5 py-2.5 bg-teal-50">
+            <dt class="text-teal-700 font-medium">💳 Liquidar hoy</dt>
+            <dd id="inst-payoff" class="font-bold text-teal-700 tabular-nums">—</dd>
+          </div>
         </dl>
       </div>
 
@@ -576,7 +580,12 @@ function todayISO() {
       instInterest.textContent    = fmt(s.interestDue);
       instPrincipal.textContent   = fmt(s.principalDue);
       instTotal.textContent       = fmt(s.amountDue);
+      // Mostrar el saldo total del préstamo (referencia) y el monto real de liquidación
       instOutstanding.textContent = fmt(loanData.outstandingBalance);
+      const instPayoffEl = document.getElementById('inst-payoff');
+      if (instPayoffEl) {
+        instPayoffEl.textContent = fmt(loanData.payoffAmount ?? loanData.outstandingBalance);
+      }
 
       const mora = parseNum(loanData.moraAmount);
       if (mora > 0.005) {
@@ -589,7 +598,9 @@ function todayISO() {
       // Configurar botones de acceso rápido
       btnExact.dataset.value    = parseNum(s.amountDue) + mora;
       btnInterest.dataset.value = parseNum(s.interestDue) + mora;
-      btnPayoff.dataset.value   = parseNum(loanData.outstandingBalance) + mora;
+      // Usar payoffAmount del servidor: capital pendiente + interés vencido + mora.
+      // Evita cobrar intereses de cuotas futuras que aún no han vencido.
+      btnPayoff.dataset.value   = parseNum(loanData.payoffAmount ?? loanData.outstandingBalance) + mora;
 
       quickAmounts.classList.remove('hidden');
 

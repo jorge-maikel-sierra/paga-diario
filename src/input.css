@@ -99,26 +99,32 @@
 
   /**
    * Botón principal — acción primaria del formulario.
+   * Fondo verde sólido con hover más oscuro para mantener contraste
+   * legible del texto blanco en todos los estados.
    */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-lg
            bg-brand-green text-white text-sm font-semibold
-           shadow-sm hover:bg-green-500 focus:outline-none
-           focus:ring-2 focus:ring-brand-green focus:ring-offset-2
-           transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+           shadow-sm hover:bg-[#00a855] active:bg-[#008f47]
+           focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /**
    * Botón secundario — cancelar o acción alternativa.
+   * Borde verde-marca con texto verde; hover invierte colores
+   * para mayor presencia visual sin competir con el primario.
    */
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-lg
-           border border-gray-300 text-gray-600 text-sm font-medium
-           bg-white hover:bg-gray-50 focus:outline-none
-           focus:ring-2 focus:ring-brand-green focus:ring-offset-2
-           transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+           border-2 border-brand-green text-brand-green text-sm font-semibold
+           bg-white hover:bg-brand-green hover:text-white
+           focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /**

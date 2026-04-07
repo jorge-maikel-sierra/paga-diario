@@ -2,6 +2,8 @@ import ExcelJS from 'exceljs';
 import Decimal from 'decimal.js';
 import dayjs from 'dayjs';
 import prisma from '../config/prisma.js';
+import { generateFixedDailySchedule } from '../engine/amortization.js';
+import { splitPayment, classifyPayment } from '../engine/payment-split.js';
 
 /**
  * @typedef {object} ImportPreview
@@ -370,6 +372,7 @@ const processClientImport = async (tx, organizationId, clientData) => {
 
 /**
  * Procesa la importación de un préstamo.
+ * Genera el cronograma de cuotas completo usando el mismo engine que createLoan.
  */
 const processLoanImport = async (tx, organizationId, loanData) => {
   const { externalLoanId, externalClientId, collectorEmail, ...fields } = loanData;
@@ -407,34 +410,60 @@ const processLoanImport = async (tx, organizationId, loanData) => {
     collectorId = defaultCollector.id;
   }
 
-  const principal = new Decimal(fields.principalAmount);
-  const rate = new Decimal(fields.monthlyRate);
-  const totalWithInterest = principal.times(rate.times(fields.termMonths).plus(1));
+  // Generar cronograma real con el engine de amortización
+  const amortization = generateFixedDailySchedule({
+    principal: fields.principalAmount,
+    monthlyRate: fields.monthlyRate,
+    termMonths: fields.termMonths,
+    startDate: fields.disbursementDate,
+    frequency: fields.frequency,
+  });
 
-  // Crear préstamo básico (sin cronograma completo por simplicidad)
-  await tx.loan.create({
+  const loan = await tx.loan.create({
     data: {
       organizationId,
       clientId: client.id,
       collectorId,
       externalLoanId,
-      principalAmount: principal,
-      interestRate: rate,
-      totalAmount: totalWithInterest,
-      installmentAmount: totalWithInterest.dividedBy(fields.termMonths),
-      outstandingBalance: totalWithInterest,
-      numberOfPayments: fields.termMonths,
-      paymentFrequency: fields.frequency,
-      disbursementDate: new Date(fields.disbursementDate),
-      expectedEndDate: dayjs(fields.disbursementDate).add(fields.termMonths, 'month').toDate(),
       status: fields.status,
+      amortizationType: 'FIXED',
+      paymentFrequency: fields.frequency,
+      principalAmount: new Decimal(fields.principalAmount).toFixed(2),
+      interestRate: new Decimal(fields.monthlyRate).toFixed(4),
+      totalAmount: amortization.totalAmount,
+      installmentAmount: amortization.installmentAmount,
+      outstandingBalance: amortization.totalAmount,
+      totalPaid: '0.00',
+      interestPaid: '0.00',
+      moraAmount: '0.00',
+      numberOfPayments: amortization.numberOfPayments,
+      paidPayments: 0,
+      disbursementDate: new Date(fields.disbursementDate),
+      expectedEndDate: new Date(amortization.expectedEndDate),
       notes: fields.notes,
     },
   });
+
+  // Crear el cronograma completo de cuotas
+  const scheduleData = amortization.schedule.map((inst) => ({
+    loanId: loan.id,
+    installmentNumber: inst.installmentNumber,
+    dueDate: new Date(inst.dueDate),
+    amountDue: inst.amountDue,
+    principalDue: inst.principalDue,
+    interestDue: inst.interestDue,
+    amountPaid: '0.00',
+    moraCharged: '0.00',
+    isPaid: false,
+  }));
+
+  await tx.paymentSchedule.createMany({ data: scheduleData });
 };
 
 /**
- * Procesa la importación de un pago.
+ * Procesa la importación de un pago histórico.
+ * Aplica el pago sobre la cuota pendiente más antigua usando el engine real,
+ * y actualiza el saldo del préstamo de forma consistente.
  */
 const processPaymentImport = async (tx, organizationId, paymentData) => {
   const { externalLoanId, collectorEmail, ...fields } = paymentData;
@@ -442,7 +471,14 @@ const processPaymentImport = async (tx, organizationId, paymentData) => {
   // Buscar préstamo
   const loan = await tx.loan.findFirst({
     where: { organizationId, externalLoanId },
-    select: { id: true },
+    select: {
+      id: true,
+      outstandingBalance: true,
+      totalPaid: true,
+      interestPaid: true,
+      moraAmount: true,
+      numberOfPayments: true,
+    },
   });
 
   if (!loan) {
@@ -475,24 +511,111 @@ const processPaymentImport = async (tx, organizationId, paymentData) => {
     collectorId = defaultCollector.id;
   }
 
-  const amount = new Decimal(fields.amount);
-  const principalPortion = amount.times(0.7);
-  const interestPortion = amount.times(0.3);
+  // Cuota pendiente más antigua del préstamo
+  const schedule = await tx.paymentSchedule.findFirst({
+    where: { loanId: loan.id, isPaid: false, isRestructured: false },
+    orderBy: { dueDate: 'asc' },
+  });
 
-  // Crear pago histórico
+  const amount = new Decimal(fields.amount);
+  const collectedAt = new Date(fields.paymentDate);
+
+  let paymentScheduleId = null;
+  let split;
+  let paymentType;
+
+  if (schedule) {
+    // Desglosar el pago usando el engine real
+    split = splitPayment(
+      amount.toFixed(2),
+      loan.moraAmount,
+      schedule.interestDue,
+      schedule.principalDue,
+    );
+    paymentType = classifyPayment(
+      split,
+      schedule.interestDue,
+      schedule.principalDue,
+      loan.outstandingBalance,
+    );
+    paymentScheduleId = schedule.id;
+
+    // Marcar la cuota como pagada si el pago la cubre completamente
+    if (paymentType !== 'PARTIAL_INTEREST') {
+      await tx.paymentSchedule.update({
+        where: { id: schedule.id },
+        data: {
+          amountPaid: new Decimal(schedule.amountPaid).plus(amount).toFixed(2),
+          isPaid: true,
+          paidAt: collectedAt,
+        },
+      });
+    } else {
+      await tx.paymentSchedule.update({
+        where: { id: schedule.id },
+        data: {
+          amountPaid: new Decimal(schedule.amountPaid).plus(amount).toFixed(2),
+        },
+      });
+    }
+  } else {
+    // Sin cuota pendiente: distribución proporcional para pagos importados sin cronograma
+    const interestRate = new Decimal(loan.outstandingBalance).gt(0)
+      ? new Decimal('0.30')
+      : new Decimal('0');
+    const interestPortion = amount.times(interestRate).toDecimalPlaces(2);
+    const principalPortion = amount.minus(interestPortion);
+    split = {
+      moraApplied: '0.00',
+      interestApplied: interestPortion.toFixed(2),
+      principalApplied: principalPortion.toFixed(2),
+      excess: '0.00',
+    };
+    paymentType = 'FULL';
+  }
+
   await tx.payment.create({
     data: {
       loanId: loan.id,
+      paymentScheduleId,
       collectorId,
-      amount,
-      totalReceived: amount,
-      paymentMethod: fields.method,
+      amount: amount.toFixed(2),
+      totalReceived: amount.toFixed(2),
+      principalApplied: split.principalApplied,
+      interestApplied: split.interestApplied,
+      moraAmount: split.moraApplied,
+      paymentMethod: fields.method || 'CASH',
+      paymentType,
       notes: fields.notes,
-      collectedAt: new Date(fields.paymentDate),
-      // Distribución simplificada para pagos históricos
-      principalApplied: principalPortion,
-      interestApplied: interestPortion,
-      paymentType: 'FULL',
+      collectedAt,
+    },
+  });
+
+  // Actualizar saldo y contadores del préstamo
+  const newTotalPaid = new Decimal(loan.totalPaid)
+    .plus(split.principalApplied)
+    .plus(split.interestApplied);
+  const newOutstanding = Decimal.max(
+    new Decimal(loan.outstandingBalance)
+      .minus(split.principalApplied)
+      .minus(split.interestApplied),
+    0,
+  );
+  const newInterestPaid = new Decimal(loan.interestPaid).plus(split.interestApplied);
+  const newMora = Decimal.max(new Decimal(loan.moraAmount).minus(split.moraApplied ?? 0), 0);
+
+  const isCompleted =
+    paymentType === 'PAYOFF' || newOutstanding.eq(0);
+
+  await tx.loan.update({
+    where: { id: loan.id },
+    data: {
+      totalPaid: newTotalPaid.toFixed(2),
+      outstandingBalance: newOutstanding.toFixed(2),
+      interestPaid: newInterestPaid.toFixed(2),
+      moraAmount: newMora.toFixed(2),
+      paidPayments: { increment: 1 },
+      ...(isCompleted && { status: 'COMPLETED', actualEndDate: collectedAt }),
     },
   });
 };

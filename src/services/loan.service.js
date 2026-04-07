@@ -286,10 +286,10 @@ export const getNextInstallment = async (id, organizationId) => {
       moraAmount: true,
       installmentAmount: true,
       status: true,
+      // Cargar todas las cuotas pendientes para calcular el payoff real
       paymentSchedule: {
         where: { isPaid: false, isRestructured: false },
         orderBy: { dueDate: 'asc' },
-        take: 1,
         select: {
           id: true,
           installmentNumber: true,
@@ -305,7 +305,26 @@ export const getNextInstallment = async (id, organizationId) => {
 
   if (!loan) return null;
 
-  const nextSchedule = loan.paymentSchedule[0] ?? null;
+  const pendingSchedules = loan.paymentSchedule;
+  const nextSchedule = pendingSchedules[0] ?? null;
+
+  // ── Calcular payoffAmount (liquidación anticipada) ─────────────────────────
+  // Regla: el cliente solo paga el capital que aún debe + los intereses de las
+  // cuotas YA VENCIDAS (dueDate ≤ hoy). Los intereses de cuotas futuras no
+  // vencidas no se cobran — el préstamo se salda con lo que se ha devengado.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const payoffAmount = pendingSchedules.reduce((acc, s) => {
+    const dueDate = new Date(s.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const principal = new Decimal(s.principalDue).minus(new Decimal(s.amountPaid ?? 0));
+    // Solo cobrar interés si la cuota ya venció (dueDate <= hoy)
+    const interest = dueDate <= today ? new Decimal(s.interestDue) : new Decimal(0);
+
+    return acc.plus(Decimal.max(principal, 0)).plus(interest);
+  }, new Decimal(loan.moraAmount));
 
   return {
     outstandingBalance: loan.outstandingBalance.toString(),
@@ -313,6 +332,8 @@ export const getNextInstallment = async (id, organizationId) => {
     installmentAmount: loan.installmentAmount.toString(),
     status: loan.status,
     nextSchedule,
+    // Monto real para liquidar el préstamo hoy (capital pendiente + interés devengado + mora)
+    payoffAmount: payoffAmount.toFixed(2),
   };
 };
 

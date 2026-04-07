@@ -196,7 +196,9 @@ const processPayment = async (input, tx) => {
       },
     });
   } else if (paymentType === 'INTEREST_ONLY') {
-    // Cuota marcada pagada (solo interés cubierto). Se extiende el cronograma.
+    // El pago cubrió el interés pero no alcanzó exactamente el capital (diferencia de redondeo
+    // o pago genuinamente parcial de capital). Se marca la cuota pagada y se extiende el
+    // cronograma con la deuda de capital restante diferida a una nueva cuota.
     updatedSchedule = await db.paymentSchedule.update({
       where: { id: schedule.id },
       data: {
@@ -206,7 +208,23 @@ const processPayment = async (input, tx) => {
       },
     });
 
-    // Última cuota del cronograma para calcular la siguiente fecha
+    // Capital no cubierto por este pago → se difiere a la nueva cuota extendida
+    const unpaidPrincipal = Decimal.max(
+      new Decimal(schedule.principalDue).minus(split.principalApplied),
+      0,
+    );
+
+    // Reducir el saldo pendiente solo por lo que efectivamente se aplicó a capital
+    const newOutstanding = Decimal.max(
+      new Decimal(loan.outstandingBalance).minus(split.principalApplied),
+      0,
+    );
+
+    const newTotalPaid = new Decimal(loan.totalPaid)
+      .plus(split.principalApplied)
+      .plus(split.interestApplied);
+
+    // Última cuota del cronograma para calcular la siguiente fecha de vencimiento
     const lastSchedule = await db.paymentSchedule.findFirst({
       where: { loanId },
       orderBy: { installmentNumber: 'desc' },
@@ -214,13 +232,17 @@ const processPayment = async (input, tx) => {
 
     const newDueDate = nextPeriodDate(lastSchedule.dueDate, loan.paymentFrequency);
 
+    // La nueva cuota acumula el capital diferido más el interés del período siguiente
+    const newInstallmentPrincipal = unpaidPrincipal.plus(schedule.principalDue);
+    const newInstallmentAmount = newInstallmentPrincipal.plus(schedule.interestDue);
+
     await db.paymentSchedule.create({
       data: {
         loanId,
         installmentNumber: lastSchedule.installmentNumber + 1,
         dueDate: new Date(newDueDate),
-        amountDue: schedule.amountDue,
-        principalDue: schedule.principalDue,
+        amountDue: newInstallmentAmount.toFixed(2),
+        principalDue: newInstallmentPrincipal.toFixed(2),
         interestDue: schedule.interestDue,
       },
     });
@@ -228,6 +250,8 @@ const processPayment = async (input, tx) => {
     updatedLoan = await db.loan.update({
       where: { id: loanId },
       data: {
+        totalPaid: newTotalPaid.toFixed(2),
+        outstandingBalance: newOutstanding.toFixed(2),
         interestPaid: newInterestPaid.toFixed(2),
         moraAmount: newMora.toFixed(2),
         numberOfPayments: { increment: 1 },

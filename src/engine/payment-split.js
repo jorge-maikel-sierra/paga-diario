@@ -141,7 +141,13 @@ export const classifyPayment = (split, interestDue, principalDue, outstandingBal
 
   if (interestApplied.lt(new Decimal(interestDue))) return 'PARTIAL_INTEREST';
 
-  if (principalApplied.lt(new Decimal(principalDue))) return 'INTEREST_ONLY';
+  // Tolerancia de $1 para absorber diferencias de redondeo entre el monto ingresado
+  // (entero sin centavos) y el principalDue calculado con decimales (ej: 33333 vs 33333.33).
+  // Sin esta tolerancia, pagos exactos se clasifican como INTEREST_ONLY incorrectamente.
+  const ROUNDING_TOLERANCE = new Decimal('1.00');
+  const principalShortfall = new Decimal(principalDue).minus(principalApplied);
+  if (principalShortfall.gt(ROUNDING_TOLERANCE)) return 'INTEREST_ONLY';
+
   if (excess.gt(0)) return 'OVERPAYMENT';
   return 'FULL';
 };
