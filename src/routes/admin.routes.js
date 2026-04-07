@@ -23,6 +23,7 @@ import reportsRouter from './admin.reports.routes.js';
 import usersRouter from './admin.users.routes.js';
 import organizationsRouter from './admin.organizations.routes.js';
 import adminApiRouter from './admin.api.routes.js';
+import importsRouter from './admin.imports.routes.js';
 
 // ============================================
 // Admin Router — Pago Ya
@@ -58,6 +59,7 @@ router.use('/clients', clientsRouter);
 router.use('/collectors', collectorsRouter);
 router.use('/payments', paymentsRouter);
 router.use('/reports', reportsRouter);
+router.use('/imports', importsRouter);
 
 // --- APIs internas del panel (typeahead, etc.) ---
 router.use('/api', adminApiRouter);
