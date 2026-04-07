@@ -13,6 +13,8 @@ import { isBusinessDay } from './amortization.js';
  * @property {string} principalApplied  - Monto aplicado a capital de la cuota
  * @property {string} excess            - Excedente después de cubrir la cuota completa
  *                                        (abono a capital)
+ * @property {string} [forgivenInterest] - Interés condonado por pago anticipado (auditoría)
+ * @property {boolean} [isEarlyPayment] - Flag si aplica condonación de interés
  */
 
 /**
@@ -50,15 +52,75 @@ export const splitPayment = (amount, moraOwed, interestDue, principalDue) => {
 };
 
 /**
+ * Aplica condonación de intereses para pagos anticipados mensuales.
+ *
+ * Regla de negocio: si el pago se registra ≥30 días antes del próximo vencimiento
+ * en préstamos MONTHLY y el monto cubre al menos el principal de la cuota,
+ * se condona el interés de esa cuota.
+ *
+ * @param {string} paymentDate - Fecha del pago (YYYY-MM-DD)
+ * @param {string} dueDate - Fecha de vencimiento de la cuota (YYYY-MM-DD)
+ * @param {'DAILY'|'WEEKLY'|'BIWEEKLY'|'MONTHLY'} frequency - Frecuencia del préstamo
+ * @param {PaymentSplit} split - Desglose original del pago
+ * @param {string|number} principalDue - Capital requerido de la cuota
+ * @returns {PaymentSplit} Split modificado con condonación aplicada si corresponde
+ */
+export const applyEarlyPaymentForgiveness = (
+  paymentDate,
+  dueDate,
+  frequency,
+  split,
+  principalDue,
+) => {
+  // Solo aplicar en préstamos mensuales
+  if (frequency !== 'MONTHLY') {
+    return split;
+  }
+
+  const paymentDay = dayjs(paymentDate);
+  const dueDateDay = dayjs(dueDate);
+  const daysDiff = dueDateDay.diff(paymentDay, 'days');
+
+  // Verificar si es pago anticipado (≥30 días antes)
+  const isEarlyPayment = daysDiff >= 30;
+
+  // Verificar si el pago cubre al menos el principal
+  const principalAppliedDecimal = new Decimal(split.principalApplied);
+  const principalDueDecimal = new Decimal(principalDue);
+  const coversPrincipal = principalAppliedDecimal.gte(principalDueDecimal);
+
+  if (isEarlyPayment && coversPrincipal) {
+    // Condonar el interés: mover el interés aplicado al principal
+    const forgivenInterest = split.interestApplied;
+    const newPrincipalApplied = principalAppliedDecimal.plus(split.interestApplied);
+
+    return {
+      ...split,
+      interestApplied: '0.00',
+      principalApplied: newPrincipalApplied.toFixed(2),
+      forgivenInterest,
+      isEarlyPayment: true,
+    };
+  }
+
+  return split;
+};
+
+/**
  * Clasifica el tipo de pago a partir del desglose y el saldo pendiente del préstamo.
  *
  * | Tipo              | Condición                                                            |
  * |-------------------|----------------------------------------------------------------------|
+ * | PAYOFF            | mora+interés+capital+exceso >= saldo pendiente (liquidación total)   |
  * | PARTIAL_INTEREST  | interestApplied < interestDue (no cubre todo el interés)             |
  * | INTEREST_ONLY     | interestApplied >= interestDue AND principalApplied < principalDue  |
  * | FULL              | cuota completa cubierta, sin excedente                               |
  * | OVERPAYMENT       | cuota completa + excedente que no liquida el préstamo                |
- * | PAYOFF            | excedente >= saldo pendiente (préstamo liquidado)                    |
+ *
+ * La verificación de PAYOFF se realiza PRIMERO porque un pago con mora alta puede
+ * no cubrir el interés de la cuota actual pero sí liquidar el saldo total del préstamo
+ * (ej: mora + capital restante = outstandingBalance). Sin este orden, el clasificador
+ * retornaría PARTIAL_INTEREST incorrectamente y el préstamo nunca quedaría COMPLETED.
  *
  * @param {PaymentSplit}   split
  * @param {string|number}  interestDue        - Interés de la cuota
@@ -67,15 +129,17 @@ export const splitPayment = (amount, moraOwed, interestDue, principalDue) => {
  * @returns {PaymentType}
  */
 export const classifyPayment = (split, interestDue, principalDue, outstandingBalance) => {
+  // moraApplied puede ser undefined en splits construidos manualmente (ej: tests de integración)
+  const moraApplied = new Decimal(split.moraApplied ?? '0');
   const interestApplied = new Decimal(split.interestApplied);
   const principalApplied = new Decimal(split.principalApplied);
   const excess = new Decimal(split.excess);
 
-  if (interestApplied.lt(new Decimal(interestDue))) return 'PARTIAL_INTEREST';
-
-  // Monto total que reduce el saldo pendiente (interés + capital + excedente)
-  const totalApplied = interestApplied.plus(principalApplied).plus(excess);
+  // PAYOFF se evalúa primero: mora + interés + capital + exceso cubre el saldo total
+  const totalApplied = moraApplied.plus(interestApplied).plus(principalApplied).plus(excess);
   if (totalApplied.gte(new Decimal(outstandingBalance))) return 'PAYOFF';
+
+  if (interestApplied.lt(new Decimal(interestDue))) return 'PARTIAL_INTEREST';
 
   if (principalApplied.lt(new Decimal(principalDue))) return 'INTEREST_ONLY';
   if (excess.gt(0)) return 'OVERPAYMENT';
