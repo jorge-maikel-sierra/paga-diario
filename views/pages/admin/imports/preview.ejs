@@ -1,0 +1,383 @@
+<%- include('../../../layouts/header') %>
+
+<div class="p-4 sm:p-6 lg:p-8 space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <a href="/admin/imports" class="text-gray-400 hover:text-brand-navy transition-colors">
+      ← Volver
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-brand-navy">Preview de Importación</h1>
+      <p class="text-sm text-gray-500 mt-1">Revisar datos antes de confirmar importación</p>
+    </div>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+          ✓
+        </div>
+        <span class="ml-2 text-sm font-medium text-green-600">Subir archivo</span>
+      </div>
+      <div class="flex-1 border-t border-green-300"></div>
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-brand-navy text-white rounded-full text-sm font-medium">
+          2
+        </div>
+        <span class="ml-2 text-sm font-medium text-brand-navy">Preview</span>
+      </div>
+      <div class="flex-1 border-t border-gray-300"></div>
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-gray-200 text-gray-600 rounded-full text-sm font-medium">
+          3
+        </div>
+        <span class="ml-2 text-sm text-gray-600">Confirmar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Info -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Archivo: <%= preview.fileName %></h3>
+    
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <!-- Clients Summary -->
+      <div class="bg-blue-50 rounded-lg p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-blue-900">Clientes</p>
+            <div class="flex items-center space-x-2 text-sm">
+              <span class="text-blue-700">Total: <%= preview.summary.clients.total %></span>
+              <span class="text-green-600">Válidos: <%= preview.summary.clients.valid %></span>
+              <span class="text-red-600">Errores: <%= preview.summary.clients.invalid %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loans Summary -->
+      <div class="bg-green-50 rounded-lg p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-green-900">Préstamos</p>
+            <div class="flex items-center space-x-2 text-sm">
+              <span class="text-green-700">Total: <%= preview.summary.loans.total %></span>
+              <span class="text-green-600">Válidos: <%= preview.summary.loans.valid %></span>
+              <span class="text-red-600">Errores: <%= preview.summary.loans.invalid %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payments Summary -->
+      <div class="bg-yellow-50 rounded-lg p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-yellow-900">Pagos</p>
+            <div class="flex items-center space-x-2 text-sm">
+              <span class="text-yellow-700">Total: <%= preview.summary.payments.total %></span>
+              <span class="text-green-600">Válidos: <%= preview.summary.payments.valid %></span>
+              <span class="text-red-600">Errores: <%= preview.summary.payments.invalid %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Preview -->
+  <div class="space-y-6">
+    
+    <!-- Clients Preview -->
+    <% if (preview.clients.length > 0) { %>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
+        <h3 class="text-lg font-medium text-blue-900">Clientes (<%= preview.summary.clients.total %>)</h3>
+      </div>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fila</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Errores</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% preview.clients.slice(0, 50).forEach(client => { %>
+            <tr class="<%= client.isValid ? '' : 'bg-red-50' %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= client.rowNumber %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= client.data?.externalClientId || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= (client.data?.firstName + ' ' + client.data?.lastName) || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= (client.data?.documentType + ' ' + client.data?.documentNumber) || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <%= client.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= client.isValid ? 'Válido' : 'Error' %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-red-600">
+                <% if (client.errors.length > 0) { %>
+                  <ul class="list-disc list-inside">
+                    <% client.errors.forEach(error => { %>
+                      <li><%= error %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% if (preview.clients.length > 50) { %>
+        <div class="px-6 py-3 bg-gray-50 text-sm text-gray-500">
+          Mostrando primeras 50 filas de <%= preview.clients.length %> total
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Loans Preview -->
+    <% if (preview.loans.length > 0) { %>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-green-50">
+        <h3 class="text-lg font-medium text-green-900">Préstamos (<%= preview.summary.loans.total %>)</h3>
+      </div>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fila</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Préstamo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Cliente</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Errores</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% preview.loans.slice(0, 50).forEach(loan => { %>
+            <tr class="<%= loan.isValid ? '' : 'bg-red-50' %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= loan.rowNumber %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= loan.data?.externalLoanId || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= loan.data?.externalClientId || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                $<%= loan.data?.principalAmount ? Number(loan.data.principalAmount).toLocaleString() : 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <%= loan.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= loan.isValid ? 'Válido' : 'Error' %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-red-600">
+                <% if (loan.errors.length > 0) { %>
+                  <ul class="list-disc list-inside">
+                    <% loan.errors.forEach(error => { %>
+                      <li><%= error %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% if (preview.loans.length > 50) { %>
+        <div class="px-6 py-3 bg-gray-50 text-sm text-gray-500">
+          Mostrando primeras 50 filas de <%= preview.loans.length %> total
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Payments Preview -->
+    <% if (preview.payments.length > 0) { %>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-yellow-50">
+        <h3 class="text-lg font-medium text-yellow-900">Pagos (<%= preview.summary.payments.total %>)</h3>
+      </div>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fila</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Préstamo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Errores</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% preview.payments.slice(0, 50).forEach(payment => { %>
+            <tr class="<%= payment.isValid ? '' : 'bg-red-50' %>">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= payment.rowNumber %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <%= payment.data?.externalLoanId || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                $<%= payment.data?.amount ? Number(payment.data.amount).toLocaleString() : 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= payment.data?.paymentDate || 'N/A' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <%= payment.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= payment.isValid ? 'Válido' : 'Error' %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-red-600">
+                <% if (payment.errors.length > 0) { %>
+                  <ul class="list-disc list-inside">
+                    <% payment.errors.forEach(error => { %>
+                      <li><%= error %></li>
+                    <% }) %>
+                  </ul>
+                <% } %>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% if (preview.payments.length > 50) { %>
+        <div class="px-6 py-3 bg-gray-50 text-sm text-gray-500">
+          Mostrando primeras 50 filas de <%= preview.payments.length %> total
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex justify-between">
+    <a href="/admin/imports" 
+       class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy">
+      ← Cancelar
+    </a>
+    
+    <% 
+    const totalValid = preview.summary.clients.valid + preview.summary.loans.valid + preview.summary.payments.valid;
+    const hasErrors = preview.summary.clients.invalid + preview.summary.loans.invalid + preview.summary.payments.invalid > 0;
+    %>
+    
+    <% if (totalValid > 0) { %>
+      <button id="confirmBtn"
+              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-brand-navy hover:bg-brand-navy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy">
+        <span>Confirmar importación</span>
+        <svg class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </button>
+    <% } else { %>
+      <div class="text-sm text-red-600 flex items-center">
+        <svg class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+        No hay datos válidos para importar
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Warning if has errors -->
+  <% if (hasErrors && totalValid > 0) { %>
+  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-yellow-700">
+          <strong>Advertencia:</strong> Se han detectado errores en algunos registros. Solo se importarán los registros válidos.
+          Las filas con errores serán omitidas.
+        </p>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const confirmBtn = document.getElementById('confirmBtn');
+  if (!confirmBtn) return;
+
+  const spinner = confirmBtn.querySelector('svg');
+  const btnLabel = confirmBtn.querySelector('span');
+
+  confirmBtn.addEventListener('click', function () {
+    // Show loading state
+    if (spinner) spinner.classList.remove('hidden');
+    if (btnLabel) btnLabel.textContent = 'Importando...';
+    confirmBtn.disabled = true;
+
+    fetch('/admin/imports/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmedAt: new Date().toISOString() }),
+    })
+      .then(function (response) {
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Respuesta inesperada del servidor. Revisa los logs.');
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        // La API usa { data, error } — si hay error lo lanzamos
+        if (data.error) {
+          throw new Error(data.error.message || 'Error en la importación');
+        }
+        // Redirigir a resultados — el servidor ya guardó los resultados en sesión
+        window.location.href = '/admin/imports/results';
+      })
+      .catch(function (error) {
+        alert('Error: ' + error.message);
+        // Reset button state
+        if (spinner) spinner.classList.add('hidden');
+        if (btnLabel) btnLabel.textContent = 'Confirmar importación';
+        confirmBtn.disabled = false;
+      });
+  });
+});
+</script>
+
+<%- include('../../../layouts/footer') %>

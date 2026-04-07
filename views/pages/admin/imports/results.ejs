@@ -1,0 +1,227 @@
+<%- include('../../../layouts/header') %>
+
+<div class="p-4 sm:p-6 lg:p-8 space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <a href="/admin/imports" class="text-gray-400 hover:text-brand-navy transition-colors">
+      ← Nueva importación
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-brand-navy">Resultados de Importación</h1>
+      <p class="text-sm text-gray-500 mt-1">Resumen de la importación completada</p>
+    </div>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+          ✓
+        </div>
+        <span class="ml-2 text-sm font-medium text-green-600">Subir archivo</span>
+      </div>
+      <div class="flex-1 border-t border-green-300"></div>
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+          ✓
+        </div>
+        <span class="ml-2 text-sm font-medium text-green-600">Preview</span>
+      </div>
+      <div class="flex-1 border-t border-green-300"></div>
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+          ✓
+        </div>
+        <span class="ml-2 text-sm font-medium text-green-600">Completado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="bg-green-50 border-l-4 border-green-400 p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-lg font-medium text-green-800">Importación completada exitosamente</h3>
+        <div class="mt-2 text-sm text-green-700">
+          <p>La importación se completó en <%= (results.duration / 1000).toFixed(2) %> segundos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Clients Results -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
+        <div class="flex items-center">
+          <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-blue-900">Clientes</h3>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4">
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Creados:</span>
+            <span class="text-sm font-medium text-green-600"><%= results.clients.created %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Actualizados:</span>
+            <span class="text-sm font-medium text-blue-600"><%= results.clients.updated %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Errores:</span>
+            <span class="text-sm font-medium text-red-600"><%= results.clients.errors.length %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loans Results -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-green-50">
+        <div class="flex items-center">
+          <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-green-900">Préstamos</h3>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4">
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Creados:</span>
+            <span class="text-sm font-medium text-green-600"><%= results.loans.created %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Errores:</span>
+            <span class="text-sm font-medium text-red-600"><%= results.loans.errors.length %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments Results -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 bg-yellow-50">
+        <div class="flex items-center">
+          <svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-yellow-900">Pagos</h3>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4">
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Creados:</span>
+            <span class="text-sm font-medium text-green-600"><%= results.payments.created %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Errores:</span>
+            <span class="text-sm font-medium text-red-600"><%= results.payments.errors.length %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Details -->
+  <% 
+  const allErrors = [...results.clients.errors, ...results.loans.errors, ...results.payments.errors];
+  %>
+  <% if (allErrors.length > 0) { %>
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+      <h3 class="text-lg font-medium text-red-900">Errores durante la importación (<%= allErrors.length %>)</h3>
+    </div>
+    <div class="max-h-64 overflow-y-auto">
+      <div class="divide-y divide-gray-200">
+        <% results.clients.errors.forEach(error => { %>
+        <div class="px-6 py-3 flex items-center space-x-4">
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+            Cliente
+          </span>
+          <span class="text-sm text-gray-500">Fila <%= error.row %>:</span>
+          <span class="text-sm text-red-600"><%= error.error %></span>
+        </div>
+        <% }) %>
+        
+        <% results.loans.errors.forEach(error => { %>
+        <div class="px-6 py-3 flex items-center space-x-4">
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+            Préstamo
+          </span>
+          <span class="text-sm text-gray-500">Fila <%= error.row %>:</span>
+          <span class="text-sm text-red-600"><%= error.error %></span>
+        </div>
+        <% }) %>
+        
+        <% results.payments.errors.forEach(error => { %>
+        <div class="px-6 py-3 flex items-center space-x-4">
+          <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+            Pago
+          </span>
+          <span class="text-sm text-gray-500">Fila <%= error.row %>:</span>
+          <span class="text-sm text-red-600"><%= error.error %></span>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Action Buttons -->
+  <div class="flex justify-between">
+    <a href="/admin/dashboard" 
+       class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy">
+      ← Ir al Dashboard
+    </a>
+    
+    <div class="flex space-x-4">
+      <% if (results.clients.created > 0) { %>
+      <a href="/admin/clients" 
+         class="inline-flex items-center px-6 py-3 border border-blue-300 shadow-sm text-base font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        Ver clientes
+      </a>
+      <% } %>
+      
+      <% if (results.loans.created > 0) { %>
+      <a href="/admin/loans" 
+         class="inline-flex items-center px-6 py-3 border border-green-300 shadow-sm text-base font-medium rounded-lg text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        Ver préstamos
+      </a>
+      <% } %>
+      
+      <% if (results.payments.created > 0) { %>
+      <a href="/admin/payments" 
+         class="inline-flex items-center px-6 py-3 border border-yellow-300 shadow-sm text-base font-medium rounded-lg text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+        Ver pagos
+      </a>
+      <% } %>
+      
+      <a href="/admin/imports" 
+         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-brand-navy hover:bg-brand-navy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy">
+        Nueva importación
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../../../layouts/footer') %>
