@@ -5,6 +5,7 @@ import {
   classifyPayment,
   nextPeriodDate,
   buildRestructuredSchedule,
+  applyEarlyPaymentForgiveness,
 } from '../engine/payment-split.js';
 
 /**
@@ -115,10 +116,22 @@ const processPayment = async (input, tx) => {
   }
 
   // ── 3. Desglosar y clasificar el pago ──────────────────────────────────────
-  const split = splitPayment(
+  let split = splitPayment(
     amountPaid,
     loan.moraAmount,
     schedule.interestDue,
+    schedule.principalDue,
+  );
+
+  // ── 3.1. Aplicar condonación para pagos anticipados mensuales ──────────────
+  const paymentDate = new Date(offlineCreatedAt).toISOString().split('T')[0]; // YYYY-MM-DD
+  const dueDate = schedule.dueDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  split = applyEarlyPaymentForgiveness(
+    paymentDate,
+    dueDate,
+    loan.paymentFrequency,
+    split,
     schedule.principalDue,
   );
 
@@ -130,6 +143,14 @@ const processPayment = async (input, tx) => {
   );
 
   // ── 4. Crear registro Payment ───────────────────────────────────────────────
+  // Agregar nota de condonación si aplicó
+  let paymentNotes = notes || '';
+  if (split.isEarlyPayment) {
+    const forgivenAmount = split.forgivenInterest || '0.00';
+    const condonationNote = `Interés condonado por pago anticipado: $${forgivenAmount}`;
+    paymentNotes = paymentNotes ? `${paymentNotes}. ${condonationNote}` : condonationNote;
+  }
+
   const payment = await db.payment.create({
     data: {
       loanId,
@@ -145,7 +166,7 @@ const processPayment = async (input, tx) => {
       latitude,
       longitude,
       paymentMethod: paymentMethod || 'CASH',
-      notes,
+      notes: paymentNotes,
       collectedAt,
     },
   });
@@ -223,7 +244,9 @@ const processPayment = async (input, tx) => {
       },
     });
 
-    const newTotalPaid = new Decimal(loan.totalPaid).plus(split.principalApplied);
+    const newTotalPaid = new Decimal(loan.totalPaid)
+      .plus(split.principalApplied)
+      .plus(split.interestApplied);
     const newOutstanding = Decimal.max(
       new Decimal(loan.outstandingBalance)
         .minus(split.principalApplied)
@@ -310,6 +333,7 @@ const processPayment = async (input, tx) => {
 
       const newTotalPaid = new Decimal(loan.totalPaid)
         .plus(split.principalApplied)
+        .plus(split.interestApplied)
         .plus(split.excess);
 
       updatedLoan = await db.loan.update({
@@ -348,22 +372,43 @@ const processPayment = async (input, tx) => {
       },
     });
 
-    // Marcar todas las cuotas restantes como restructured (ya no aplican)
-    await db.paymentSchedule.updateMany({
-      where: { loanId, isPaid: false, isRestructured: false },
-      data: { isRestructured: true },
+    // PAYOFF: marcar todas las cuotas pendientes como pagadas (liquidación completa)
+    // También eliminar cualquier mora y restructuring previo, ya que el préstamo se liquida.
+    // Excluimos la cuota actual (schedule.id) porque ya fue actualizada arriba.
+    const pendingSchedules = await db.paymentSchedule.findMany({
+      where: { loanId, isPaid: false, id: { not: schedule.id } },
+      select: { id: true, amountDue: true },
     });
 
+    // Actualizar cada cuota pendiente individualmente para establecer amountPaid = amountDue
+    if (pendingSchedules.length > 0) {
+      await Promise.all(
+        pendingSchedules.map((s) =>
+          db.paymentSchedule.update({
+            where: { id: s.id },
+            data: {
+              isPaid: true,
+              paidAt: collectedAt,
+              amountPaid: s.amountDue, // Marcar como completamente pagada
+              moraCharged: '0.00',
+              isRestructured: false, // Limpiar flag de restructuración
+            },
+          }),
+        ),
+      );
+    }
+
+    // Ajustar paidPayments para que sea igual a numberOfPayments (progreso 100%)
     updatedLoan = await db.loan.update({
       where: { id: loanId },
       data: {
         totalPaid: new Decimal(loan.totalAmount).toFixed(2),
         outstandingBalance: '0.00',
         interestPaid: newInterestPaid.toFixed(2),
-        moraAmount: newMora.toFixed(2),
+        moraAmount: '0.00', // PAYOFF elimina toda la mora pendiente
         status: 'COMPLETED',
         actualEndDate: collectedAt,
-        paidPayments: { increment: 1 },
+        paidPayments: loan.numberOfPayments, // Forzar progreso 100%
       },
     });
   }
