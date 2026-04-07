@@ -59,9 +59,16 @@ function formatDateTime(date) {
 }
 
 const badge = STATUS_MAP[loan.status] || { bg: 'bg-gray-100', text: 'text-gray-500', label: loan.status };
-const progressPct = loan.numberOfPayments > 0
-  ? Math.round((loan.paidPayments / loan.numberOfPayments) * 100)
-  : 0;
+
+// Calcular progreso con clamp defensivo: si el préstamo está COMPLETED, mostrar 100%
+let progressPct;
+if (loan.status === 'COMPLETED') {
+  progressPct = 100;
+} else if (loan.numberOfPayments > 0) {
+  progressPct = Math.round((loan.paidPayments / loan.numberOfPayments) * 100);
+} else {
+  progressPct = 0;
+}
 %>
 <%- include('../../layouts/header') %>
 <div class="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -301,8 +308,8 @@ const progressPct = loan.numberOfPayments > 0
             <% loan.paymentSchedule.forEach(function(schedule) {
               const isOverdue = !schedule.isPaid && !schedule.isRestructured && new Date(schedule.dueDate) < new Date();
               let rowClass = 'hover:bg-gray-50 transition-colors';
-              if (schedule.isRestructured) rowClass = 'bg-purple-50 opacity-60';
-              else if (schedule.isPaid)    rowClass = 'bg-green-50 hover:bg-green-100 transition-colors';
+              if (schedule.isPaid)         rowClass = 'bg-green-50 hover:bg-green-100 transition-colors';
+              else if (schedule.isRestructured) rowClass = 'bg-purple-50 opacity-60';
               else if (isOverdue)          rowClass = 'bg-red-50 hover:bg-red-100 transition-colors';
             %>
               <tr class="<%= rowClass %>">
@@ -325,13 +332,13 @@ const progressPct = loan.numberOfPayments > 0
                   <%= parseFloat(schedule.moraCharged) > 0 ? formatCOP(schedule.moraCharged) : '—' %>
                 </td>
                 <td class="px-4 py-2.5 text-center">
-                  <% if (schedule.isRestructured) { %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                      ↺ Restructurada
-                    </span>
-                  <% } else if (schedule.isPaid) { %>
+                  <% if (schedule.isPaid) { %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                       ✓ Pagada
+                    </span>
+                  <% } else if (schedule.isRestructured) { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                      ↺ Restructurada
                     </span>
                   <% } else if (isOverdue) { %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">
