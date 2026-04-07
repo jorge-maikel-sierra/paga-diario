@@ -40,8 +40,7 @@ if (process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line no-console
   // console.info('[Redis] Deshabilitado en entorno de test');
 } else if (redisClient) {
-  redisClient.on('connect', () => {
-  });
+  redisClient.on('connect', () => {});
 
   redisClient.on('error', (err) => {
     console.error('[Redis] Error de conexión:', err.message);

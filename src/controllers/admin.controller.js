@@ -712,7 +712,25 @@ const createPayment = asyncHandler(async (req, res) => {
     collectedAt: result.payment.collectedAt.toISOString(),
   });
 
-  req.session.flashSucess = 'Pago registrado exitosamente';
+  // Notificar en tiempo real — PAYOFF emite estado final para que los clientes
+  // conectados actualicen barra de progreso y cronograma sin recargar la página
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('payment:created', {
+      paymentId: result.payment.id,
+      loanId: result.loan.id,
+      amount: result.payment.amount,
+      outstandingBalance: result.loan.outstandingBalance,
+      paidPayments: result.loan.paidPayments,
+      status: result.loan.status,
+      paymentType: result.paymentType,
+    });
+  }
+
+  const isPayoff = result.paymentType === 'PAYOFF';
+  req.session.flashSucess = isPayoff
+    ? `Liquidación registrada. Préstamo de ${result.clientName} completado al 100%.`
+    : 'Pago registrado exitosamente';
   return res.redirect('/admin/payments');
 });
 

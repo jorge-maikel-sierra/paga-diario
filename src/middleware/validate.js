@@ -22,6 +22,8 @@ const validate = (schema) => async (req, _res, next) => {
       body: req.body,
       query: req.query,
       params: req.params,
+      // Incluimos req.file para que los schemas de upload puedan validar metadatos del archivo
+      ...(req.file !== undefined && { file: req.file }),
     });
 
     req.body = parsed.body ?? req.body;

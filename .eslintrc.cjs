@@ -81,5 +81,13 @@ module.exports = {
         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
       },
     },
+    {
+      // import.controller.js usa createRequire para cargar multer v2 (módulo CJS)
+      // El linter no puede resolver require() dinámicos, pero multer sí está en dependencies
+      files: ['src/controllers/import.controller.js'],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+      },
+    },
   ],
 };
