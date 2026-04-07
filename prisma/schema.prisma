@@ -118,6 +118,7 @@ model Client {
   id               String   @id @default(uuid()) @db.Uuid
   organizationId   String?  @map("organization_id") @db.Uuid
   routeId          String?  @map("route_id") @db.Uuid
+  externalClientId String?  @map("external_client_id") @db.VarChar(100)
   firstName        String   @map("first_name") @db.VarChar(80)
   lastName         String   @map("last_name") @db.VarChar(80)
   documentType     String   @default("CC") @map("document_type") @db.VarChar(10)
@@ -143,9 +144,11 @@ model Client {
   loans        Loan[]
 
   @@unique([organizationId, documentType, documentNumber])
+  @@unique([organizationId, externalClientId])
   @@index([organizationId])
   @@index([routeId])
   @@index([documentNumber])
+  @@index([externalClientId])
   @@map("clients")
 }
 
@@ -175,6 +178,7 @@ model Loan {
   organizationId    String            @map("organization_id") @db.Uuid
   clientId          String            @map("client_id") @db.Uuid
   collectorId       String            @map("collector_id") @db.Uuid
+  externalLoanId    String?           @map("external_loan_id") @db.VarChar(100)
   status            LoanStatus        @default(PENDING)
   amortizationType  AmortizationType  @default(FIXED) @map("amortization_type")
   paymentFrequency  PaymentFrequency  @default(DAILY) @map("payment_frequency")
@@ -205,11 +209,13 @@ model Loan {
   payments        Payment[]
   incidents       Incident[]
 
+  @@unique([organizationId, externalLoanId])
   @@index([organizationId])
   @@index([clientId])
   @@index([collectorId])
   @@index([status])
   @@index([disbursementDate])
+  @@index([externalLoanId])
   @@map("loans")
 }
 
