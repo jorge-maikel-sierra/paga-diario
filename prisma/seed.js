@@ -109,6 +109,22 @@ const seed = async () => {
     },
   });
 
+  // Usuario de demostración público — credenciales fijas (no vienen de env)
+  // porque se muestran a cualquier visitante en la landing page.
+  const demoPassword = await hashPassword('Demo2026!');
+  const _demo = await prisma.user.create({
+    data: {
+      organizationId: org.id,
+      role: 'ADMIN',
+      firstName: 'Usuario',
+      lastName: 'Demo',
+      email: 'demo@pagadiario.com',
+      phone: '3000000000',
+      passwordHash: demoPassword,
+      isActive: true,
+    },
+  });
+
   const collector1 = await prisma.user.create({
     data: {
       organizationId: org.id,

@@ -281,6 +281,7 @@ describe('getLogin', () => {
       currentPath: '/admin/login',
       flashError: undefined,
       flashSucess: undefined,
+      prefillEmail: '',
     });
   });
 

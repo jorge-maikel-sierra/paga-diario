@@ -5,98 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> | Paga Diario Admin</title>
 
-  <!-- Tailwind CSS compilado -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('theme');
+      var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', isDark);
+    })();
+  </script>
+
   <link href="/css/styles.css" rel="stylesheet" />
 
-  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="h-full bg-brand-navy font-sans antialiased">
+<body class="h-full bg-app font-sans text-ink antialiased">
 
   <div class="flex min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
+    <div class="w-full max-w-sm space-y-6">
 
       <!-- Logo / Branding -->
       <div class="text-center">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-green">
+        <a href="/" class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand hover:opacity-90 transition-opacity">
           <span class="text-2xl font-bold text-white">$</span>
-        </div>
-        <h1 class="mt-4 text-3xl font-bold tracking-tight text-white">Paga Diario</h1>
-        <p class="mt-2 text-sm text-gray-400">Panel de Administración</p>
+        </a>
+        <h1 class="mt-4 font-display text-2xl font-bold tracking-tight text-ink">Paga Diario</h1>
+        <p class="mt-1 text-sm text-ink-secondary">Panel de Administración</p>
       </div>
+
+      <% if (typeof prefillEmail !== 'undefined' && prefillEmail === 'demo@pagadiario.com') { %>
+        <div class="flash-banner bg-brand/10 border-brand/20">
+          <span class="text-lg shrink-0">🎟️</span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-ink">Entrando con la <strong>cuenta demo pública</strong>.</p>
+            <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="text-xs font-medium text-ink-secondary uppercase shrink-0">Contraseña</span>
+              <code class="text-sm font-mono font-semibold text-ink">Demo2026!</code>
+              <button type="button" data-copy="Demo2026!"
+                class="text-xs font-semibold text-brand hover:underline shrink-0">
+                📋 Copiar
+              </button>
+            </div>
+          </div>
+        </div>
+      <% } %>
 
       <!-- Flash messages -->
       <% if (typeof flashError !== 'undefined' && flashError) { %>
-        <div class="rounded-lg bg-red-900/50 border border-red-500/30 p-4" role="alert">
-          <div class="flex items-center gap-2">
-            <span class="text-red-400 text-lg">❌</span>
-            <p class="text-sm font-medium text-red-200"><%= flashError %></p>
-          </div>
+        <div class="flash-error" role="alert">
+          <span class="text-danger text-lg shrink-0">❌</span>
+          <p class="flash-error-text"><%= flashError %></p>
         </div>
       <% } %>
 
       <% if (typeof flashSucess !== 'undefined' && flashSucess) { %>
-        <div class="rounded-lg bg-green-900/50 border border-green-500/30 p-4" role="alert">
-          <div class="flex items-center gap-2">
-            <span class="text-green-400 text-lg">✅</span>
-            <p class="text-sm font-medium text-green-200"><%= flashSucess %></p>
-          </div>
+        <div class="flash-success" role="alert">
+          <span class="text-success text-lg shrink-0">✅</span>
+          <p class="flash-success-text"><%= flashSucess %></p>
         </div>
       <% } %>
 
       <!-- Login form -->
-      <form action="/admin/login" method="POST" class="mt-8 space-y-6 rounded-xl bg-white/5 p-8 backdrop-blur-sm border border-white/10">
-        <div class="space-y-4">
-          <!-- Email -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-300">Correo electrónico</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-              placeholder="admin@empresa.com"
-              class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-500 focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/50 sm:text-sm"
-            >
-          </div>
-
-          <!-- Password -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-300">Contraseña</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              placeholder="••••••••"
-              class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-500 focus:border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green/50 sm:text-sm"
-            >
-          </div>
+      <form action="/admin/login" method="POST" class="card p-6 sm:p-8 space-y-5">
+        <div class="form-group">
+          <label for="email" class="form-label">Correo electrónico</label>
+          <input
+            id="email" name="email" type="email" autocomplete="email" required
+            placeholder="admin@empresa.com" class="form-input"
+            value="<%= typeof prefillEmail !== 'undefined' ? prefillEmail : '' %>"
+          >
         </div>
 
-        <!-- Submit -->
-        <button
-          type="submit"
-          class="flex w-full justify-center rounded-lg bg-brand-green px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 focus:ring-offset-brand-navy transition-colors duration-200"
-        >
+        <div class="form-group">
+          <label for="password" class="form-label">Contraseña</label>
+          <input
+            id="password" name="password" type="password" autocomplete="current-password" required
+            placeholder="••••••••" class="form-input"
+          >
+        </div>
+
+        <button type="submit" class="btn-primary w-full">
           Iniciar Sesión
         </button>
       </form>
 
-      <p class="text-center mt-3">
-        <a href="/register" class="text-sm text-white underline">¿No tienes cuenta? Crear cuenta</a>
+      <p class="text-center">
+        <a href="/register" class="text-sm font-medium text-brand hover:underline">¿No tenés cuenta? Creá una</a>
       </p>
 
-      <!-- Footer -->
-      <p class="text-center text-xs text-gray-500">
+      <p class="text-center text-xs text-ink-muted">
         &copy; <%= new Date().getFullYear() %> Paga Diario. Todos los derechos reservados.
       </p>
     </div>
   </div>
 
+  <script>
+    document.querySelectorAll('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.dataset.copy;
+        const original = btn.textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = '✅ ¡Copiado!';
+        } catch {
+          btn.textContent = 'No se pudo copiar';
+        }
+        setTimeout(() => { btn.textContent = original; }, 1600);
+      });
+    });
+  </script>
 </body>
 </html>

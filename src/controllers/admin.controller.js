@@ -35,6 +35,7 @@ const getLogin = (req, res) => {
     currentPath: '/admin/login',
     flashError,
     flashSucess,
+    prefillEmail: typeof req.query?.email === 'string' ? req.query.email : '',
   });
 };
 

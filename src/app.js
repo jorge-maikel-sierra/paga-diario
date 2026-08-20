@@ -20,6 +20,7 @@ import authRoutes from './routes/auth.routes.js';
 
 // Database health check
 import { getDatabaseHealth, getUsersHealth } from './controllers/health.controller.js';
+import { getLanding } from './controllers/marketing.controller.js';
 
 // --- Rutas de directorio (ESM no tiene __dirname) ---
 const __filename = fileURLToPath(import.meta.url);
@@ -202,6 +203,9 @@ app.use((req, res, next) => {
 // ============================================
 // RUTAS
 // ============================================
+
+// Landing page pública (venta) — raíz del sitio, sin autenticación
+app.get('/', getLanding);
 
 // Health check
 app.get('/api/v1/health', (req, res) => {

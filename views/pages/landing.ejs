@@ -1,0 +1,432 @@
+<%
+  const formatCOP = (val) => '$' + Number(val).toLocaleString('es-CO');
+
+  const features = [
+    {
+      icon: 'dashboard',
+      title: 'Dashboard en vivo',
+      body: 'Capital desembolsado, recaudo del día, mora acumulada y cuotas vencidas — todo actualizado en tiempo real, sin recargar la página.',
+    },
+    {
+      icon: 'mora',
+      title: 'Mora automática',
+      body: 'La mora se recalcula sola cada día con la tasa configurable de tu negocio, sin planillas ni cálculos manuales que se desactualizan.',
+    },
+    {
+      icon: 'map',
+      title: 'Mapa de rutas',
+      body: 'Visualizá a todos los clientes de una ruta en un mapa interactivo. Tu cobrador sabe exactamente por dónde ir.',
+    },
+    {
+      icon: 'team',
+      title: 'Roles por cobrador',
+      body: 'Cada cobrador ve solo su ruta y sus cobros. Vos, como admin, ves todo el negocio consolidado.',
+    },
+    {
+      icon: 'reports',
+      title: 'Reportes al instante',
+      body: 'Cartera del día en Excel con un clic, o un PDF detallado generado en segundo plano para tus reuniones.',
+    },
+    {
+      icon: 'import',
+      title: 'Importación masiva',
+      body: '¿Ya tenés clientes y préstamos en Excel? Subilos de una sola vez y seguí operando sin perder el histórico.',
+    },
+  ];
+
+  const painPoints = [
+    { icon: '📓', title: 'El cuaderno se pierde', body: 'Una cuota que no quedó anotada es plata que nadie vuelve a cobrar.' },
+    { icon: '🧮', title: 'La mora se calcula a mano', body: 'Cada cobrador la calcula distinto — y casi siempre mal.' },
+    { icon: '🗺️', title: 'Rutas sin orden', body: 'El cobrador improvisa el recorrido y termina yendo dos veces al mismo barrio.' },
+    { icon: '🙈', title: 'El dueño no ve nada', body: 'Hasta fin de mes no sabés si el negocio va bien o va perdiendo plata.' },
+  ];
+
+  const steps = [
+    { n: '1', title: 'Cargá tu cartera', body: 'Registrá clientes y préstamos a mano o importalos desde tu Excel actual en minutos.' },
+    { n: '2', title: 'Tus cobradores cobran', body: 'Desde el celular, cada cobrador registra el pago del día en su ruta — cuota, mora o abono a capital.' },
+    { n: '3', title: 'Vos ves todo en vivo', body: 'Dashboard, alertas de mora y reportes se actualizan solos. Ninguna cuota se pierde de vista.' },
+  ];
+
+  const faqs = [
+    {
+      q: '¿Necesito tarjeta de crédito para probar la demo?',
+      a: 'No. Entrás directo con el usuario y contraseña de esta página. Es un entorno de datos de ejemplo, pensado para que explores el producto sin ninguna fricción.',
+    },
+    {
+      q: '¿Los datos que veo en la demo son reales?',
+      a: 'Son datos de ejemplo (clientes, préstamos y pagos ficticios) para que veas el sistema funcionando con información realista. Podés crear, editar y borrar libremente — es un sandbox.',
+    },
+    {
+      q: '¿Cómo calcula la mora la aplicación?',
+      a: 'Cada organización configura sus propios días de gracia y multiplicador de mora. Un proceso automático recalcula la mora de toda la cartera todos los días, sin intervención manual.',
+    },
+    {
+      q: '¿Puedo tener varios cobradores con rutas distintas?',
+      a: 'Sí. Cada ruta se asigna a un cobrador, y cada cobrador solo ve los clientes y cobros de su propia ruta. El admin ve el consolidado completo.',
+    },
+    {
+      q: '¿Funciona bien desde el celular?',
+      a: 'Sí, toda la interfaz es responsive — pensada para que un cobrador registre pagos desde la calle, no solo desde un escritorio.',
+    },
+  ];
+
+  const iconPath = (name) => ({
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="12" y="3" width="5" height="5" rx="1.5"/><rect x="12" y="10" width="5" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="3" rx="1.5"/>',
+    mora: '<circle cx="10" cy="10" r="7.25"/><path d="M10 6v8M12.25 8.1c0-1.16-1-2.1-2.25-2.1s-2.25.94-2.25 2c0 1.06 1 1.5 2.25 1.9s2.25.84 2.25 1.9c0 1.06-1 2.1-2.25 2.1S7.75 12.86 7.75 12" stroke-linecap="round"/>',
+    map: '<path d="M10 2c-3 0-5.5 2.24-5.5 5.5C4.5 11.5 10 18 10 18s5.5-6.5 5.5-10.5C15.5 4.24 13 2 10 2Z"/><circle cx="10" cy="7.5" r="2"/>',
+    team: '<circle cx="7" cy="6" r="2.75"/><path d="M2 17c0-2.9 2.24-5.25 5-5.25s5 2.35 5 5.25"/><path d="M12.5 5.25a2.5 2.5 0 0 1 0 4.9M17 16.75c-.15-2.35-1.65-4.25-3.75-4.9" stroke-linecap="round"/>',
+    reports: '<path d="M3 17V9M8.5 17V4M14 17v-6M17 17H3" stroke-linecap="round" stroke-linejoin="round"/>',
+    import: '<path d="M10 3v9.5M6.25 9.25 10 13l3.75-3.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 14.5v1.75a1.25 1.25 0 0 0 1.25 1.25h10.5a1.25 1.25 0 0 0 1.25-1.25V14.5" stroke-linecap="round"/>',
+  })[name] || '';
+  const icon = (name, cls) => `<svg class="${cls || 'w-6 h-6'}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">${iconPath(name)}</svg>`;
+%>
+<!doctype html>
+<html lang="es" class="h-full scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Paga Diario</title>
+  <meta name="description" content="Paga Diario es el sistema para administrar cartera de préstamos diarios: cobradores, rutas, mora automática y reportes en tiempo real. Probá la demo gratis." />
+
+  <script>
+    (function () {
+      var stored = localStorage.getItem('theme');
+      var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', isDark);
+    })();
+  </script>
+
+  <link href="/css/styles.css" rel="stylesheet" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="h-full bg-app font-sans text-ink antialiased overflow-x-hidden">
+
+  <!-- Blobs decorativos de fondo -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-24 -left-24 w-[32rem] h-[32rem] rounded-full bg-brand/20 blur-3xl animate-blob"></div>
+    <div class="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-info/15 blur-3xl animate-blob" style="animation-delay: -6s;"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 rounded-full bg-brand/10 blur-3xl animate-blob" style="animation-delay: -11s;"></div>
+  </div>
+
+  <!-- ============================= NAV ============================= -->
+  <header id="landing-nav" class="sticky top-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2.5">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand text-white text-base font-bold">$</span>
+          <span class="font-display text-lg font-semibold text-ink tracking-tight">Paga Diario</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#funciones" class="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">Funciones</a>
+          <a href="#como-funciona" class="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">Cómo funciona</a>
+          <a href="#demo" class="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">Demo en vivo</a>
+          <a href="#faq" class="text-sm font-medium text-ink-secondary hover:text-ink transition-colors">Preguntas</a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <button type="button" data-theme-toggle aria-label="Cambiar tema"
+            class="p-2 rounded-lg text-ink-secondary hover:bg-surface-hover hover:text-ink transition-colors">
+            <svg class="w-5 h-5 dark:hidden" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 10.8A7.2 7.2 0 0 1 8.2 2a7.2 7.2 0 1 0 8.8 8.8Z" stroke-linejoin="round" />
+            </svg>
+            <svg class="w-5 h-5 hidden dark:block" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="10" cy="10" r="3.25" />
+              <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7" stroke-linecap="round" />
+            </svg>
+          </button>
+          <a href="/admin/login?email=demo@pagadiario.com" class="hidden sm:inline-flex btn-primary !px-4 !py-2 text-sm">
+            Probar demo
+          </a>
+          <button type="button" id="landing-mobile-toggle" aria-label="Abrir menú" aria-controls="landing-mobile-menu" aria-expanded="false"
+            class="md:hidden p-2 rounded-lg text-ink-secondary hover:bg-surface-hover transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="landing-mobile-menu" class="hidden md:hidden border-b border-line bg-surface px-4 pb-4 space-y-1">
+      <a href="#funciones" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-ink-secondary hover:bg-surface-hover">Funciones</a>
+      <a href="#como-funciona" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-ink-secondary hover:bg-surface-hover">Cómo funciona</a>
+      <a href="#demo" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-ink-secondary hover:bg-surface-hover">Demo en vivo</a>
+      <a href="#faq" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-ink-secondary hover:bg-surface-hover">Preguntas</a>
+      <a href="/admin/login?email=demo@pagadiario.com" class="block mt-2 btn-primary text-center text-sm">Probar demo</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================= HERO ============================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-20 lg:pb-28">
+      <div class="grid lg:grid-cols-2 gap-14 items-center">
+
+        <div data-reveal>
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 text-brand text-xs font-semibold">
+            💸 Hecho para prestamistas y casas de cobro diario
+          </span>
+          <h1 class="mt-5 font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight text-ink leading-[1.08]">
+            No pierdas ni una cuota de tu <span class="text-brand">cartera diaria</span>
+          </h1>
+          <p class="mt-5 text-lg text-ink-secondary leading-relaxed max-w-xl">
+            Paga Diario reemplaza el cuaderno y el Excel: tus cobradores registran los pagos desde el celular,
+            la mora se calcula sola, y vos ves todo el negocio en un dashboard que se actualiza en vivo.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <a href="/admin/login?email=demo@pagadiario.com" class="btn-primary text-base group">
+              Probar la demo gratis
+              <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+            </a>
+            <a href="#funciones" class="btn-secondary text-base">
+              Ver cómo funciona
+            </a>
+          </div>
+          <p class="mt-4 text-xs text-ink-muted">
+            Sin tarjeta · Sin registro · Entrás con un usuario de prueba en 10 segundos
+          </p>
+        </div>
+
+        <!-- Mockup del producto -->
+        <div data-reveal style="transition-delay: 120ms;" class="relative">
+          <div class="card p-5 sm:p-6 animate-float shadow-2xl shadow-brand/5">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <p class="font-display font-semibold text-ink">Dashboard</p>
+                <p class="text-xs text-ink-muted">Resumen de la operación</p>
+              </div>
+              <span class="badge-success">
+                <span class="w-1.5 h-1.5 rounded-full bg-success"></span> En vivo
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl border border-line p-3.5">
+                <p class="text-[11px] font-medium text-ink-secondary">Recaudado hoy</p>
+                <p class="mt-1 text-lg font-display font-bold text-success tabular-nums"><%= formatCOP(stats.totalCollected) %></p>
+              </div>
+              <div class="rounded-xl border border-line p-3.5">
+                <p class="text-[11px] font-medium text-ink-secondary">Préstamos activos</p>
+                <p class="mt-1 text-lg font-display font-bold text-ink tabular-nums"><%= stats.totalLoans %></p>
+              </div>
+            </div>
+            <div class="mt-3 rounded-xl border border-line p-3.5">
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-[11px] font-medium text-ink-secondary">🚨 Alertas de mora</p>
+                <span class="badge-danger">2</span>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-ink">Ricardo Ospina</span>
+                  <span class="font-semibold text-danger">$40.000</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-ink">Ana García</span>
+                  <span class="font-semibold text-danger">$20.000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Badge flotante -->
+          <div class="absolute -bottom-5 -left-5 card px-4 py-3 flex items-center gap-2.5 animate-float" style="animation-delay: -2.5s;">
+            <span class="text-xl">📍</span>
+            <div>
+              <p class="text-xs font-semibold text-ink">Ruta Centro</p>
+              <p class="text-[11px] text-ink-muted">3 clientes cerca</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================= DOLOR ============================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div data-reveal class="text-center max-w-2xl mx-auto">
+        <h2 class="font-display text-3xl font-bold text-ink">¿Te suena familiar?</h2>
+        <p class="mt-3 text-ink-secondary">Así se maneja la cartera diaria en la mayoría de los negocios — hasta que empieza a doler.</p>
+      </div>
+      <div data-reveal-group class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <% painPoints.forEach((p) => { %>
+          <div data-reveal class="card p-5">
+            <span class="text-3xl">‎<%= p.icon %></span>
+            <h3 class="mt-3 font-semibold text-ink"><%= p.title %></h3>
+            <p class="mt-1.5 text-sm text-ink-secondary leading-relaxed"><%= p.body %></p>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- ============================= FUNCIONES ============================= -->
+    <section id="funciones" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 scroll-mt-16">
+      <div data-reveal class="text-center max-w-2xl mx-auto">
+        <span class="text-xs font-semibold text-brand uppercase tracking-wider">Funciones</span>
+        <h2 class="mt-2 font-display text-3xl font-bold text-ink">Todo lo que necesitás para cobrar cartera diaria</h2>
+        <p class="mt-3 text-ink-secondary">Construido específicamente para préstamos de cuota diaria, no adaptado de un CRM genérico.</p>
+      </div>
+
+      <div data-reveal-group class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <% features.forEach((f) => { %>
+          <div data-reveal class="card p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-brand/10 text-brand">
+              <%- icon(f.icon) %>
+            </div>
+            <h3 class="mt-4 font-display font-semibold text-ink"><%= f.title %></h3>
+            <p class="mt-1.5 text-sm text-ink-secondary leading-relaxed"><%= f.body %></p>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- ============================= CÓMO FUNCIONA ============================= -->
+    <section id="como-funciona" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 scroll-mt-16">
+      <div data-reveal class="text-center max-w-2xl mx-auto">
+        <span class="text-xs font-semibold text-brand uppercase tracking-wider">Cómo funciona</span>
+        <h2 class="mt-2 font-display text-3xl font-bold text-ink">De la cartera desordenada al dashboard en vivo</h2>
+      </div>
+
+      <div data-reveal-group class="mt-12 grid md:grid-cols-3 gap-8 relative">
+        <div class="hidden md:block absolute top-6 left-[16.66%] right-[16.66%] h-px bg-line"></div>
+        <% steps.forEach((s) => { %>
+          <div data-reveal class="relative text-center md:text-left">
+            <div class="relative z-10 mx-auto md:mx-0 flex items-center justify-center w-12 h-12 rounded-full bg-brand text-white font-display font-bold text-lg">
+              <%= s.n %>
+            </div>
+            <h3 class="mt-4 font-display font-semibold text-ink text-lg"><%= s.title %></h3>
+            <p class="mt-1.5 text-sm text-ink-secondary leading-relaxed"><%= s.body %></p>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- ============================= ESTADÍSTICAS EN VIVO ============================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div data-reveal class="card p-5 sm:p-8 lg:p-12 text-center overflow-hidden relative">
+        <span class="text-xs font-semibold text-brand uppercase tracking-wider">Datos reales de la demo</span>
+        <h2 class="mt-2 font-display text-2xl sm:text-3xl font-bold text-ink">Así se ve funcionando ahora mismo</h2>
+        <p class="mt-2 text-sm text-ink-secondary max-w-lg mx-auto">
+          Estas cifras se leen en vivo de la base de datos de la demo pública — no son un ejemplo estático.
+        </p>
+
+        <div class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-x-2 sm:gap-x-4 gap-y-8">
+          <div class="min-w-0">
+            <p class="font-display text-xl sm:text-2xl lg:text-4xl font-bold text-ink tabular-nums truncate"
+               data-count-to="<%= stats.totalClients %>">0</p>
+            <p class="mt-1 text-xs font-medium text-ink-secondary uppercase tracking-wide">Clientes activos</p>
+          </div>
+          <div class="min-w-0">
+            <p class="font-display text-xl sm:text-2xl lg:text-4xl font-bold text-brand tabular-nums truncate"
+               data-count-to="<%= stats.totalDisbursed %>" data-count-prefix="$">0</p>
+            <p class="mt-1 text-xs font-medium text-ink-secondary uppercase tracking-wide">Capital desembolsado</p>
+          </div>
+          <div class="min-w-0">
+            <p class="font-display text-xl sm:text-2xl lg:text-4xl font-bold text-ink tabular-nums truncate"
+               data-count-to="<%= stats.totalPayments %>">0</p>
+            <p class="mt-1 text-xs font-medium text-ink-secondary uppercase tracking-wide">Pagos registrados</p>
+          </div>
+          <div class="min-w-0">
+            <p class="font-display text-xl sm:text-2xl lg:text-4xl font-bold text-ink tabular-nums truncate"
+               data-count-to="<%= stats.totalRoutes %>">0</p>
+            <p class="mt-1 text-xs font-medium text-ink-secondary uppercase tracking-wide">Rutas de cobro</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= DEMO CTA ============================= -->
+    <section id="demo" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 scroll-mt-16">
+      <div data-reveal class="relative overflow-hidden rounded-3xl bg-action p-8 sm:p-12 text-center">
+        <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5"></div>
+        <div class="absolute -bottom-20 -left-10 w-64 h-64 rounded-full bg-white/5"></div>
+
+        <div class="relative">
+          <span class="text-4xl">🎟️</span>
+          <h2 class="mt-4 font-display text-2xl sm:text-3xl font-bold text-action-on">Explorá la app con una cuenta de prueba</h2>
+          <p class="mt-3 text-action-on/80 max-w-lg mx-auto">
+            Sin formularios, sin esperar aprobación. Entrás ahora mismo con cartera, clientes y pagos ya cargados.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 max-w-full sm:max-w-fit mx-auto">
+            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 rounded-xl bg-white/10 min-w-0">
+              <span class="text-xs font-medium text-action-on/60 uppercase shrink-0">Usuario</span>
+              <code class="text-xs sm:text-sm font-mono font-semibold text-action-on break-all">demo@pagadiario.com</code>
+              <button type="button" data-copy="demo@pagadiario.com"
+                class="text-xs font-semibold text-action-on/70 hover:text-action-on transition-colors shrink-0">Copiar</button>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 rounded-xl bg-white/10 min-w-0">
+              <span class="text-xs font-medium text-action-on/60 uppercase shrink-0">Clave</span>
+              <code class="text-xs sm:text-sm font-mono font-semibold text-action-on break-all">Demo2026!</code>
+              <button type="button" data-copy="Demo2026!"
+                class="text-xs font-semibold text-action-on/70 hover:text-action-on transition-colors shrink-0">Copiar</button>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <a href="/admin/login?email=demo@pagadiario.com"
+               class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg bg-white text-action text-sm font-semibold shadow-lg hover:scale-105 active:scale-100 transition-transform">
+              Entrar a la demo ahora →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= FAQ ============================= -->
+    <section id="faq" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 scroll-mt-16">
+      <div data-reveal class="text-center">
+        <span class="text-xs font-semibold text-brand uppercase tracking-wider">Preguntas frecuentes</span>
+        <h2 class="mt-2 font-display text-3xl font-bold text-ink">Lo que seguramente estás pensando</h2>
+      </div>
+
+      <div data-reveal class="mt-10 card divide-y divide-line-subtle overflow-hidden">
+        <% faqs.forEach((f, i) => { %>
+          <div>
+            <button type="button" data-faq-trigger aria-expanded="false" id="faq-trigger-<%= i %>"
+              class="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-4 text-left hover:bg-surface-hover transition-colors">
+              <span class="font-medium text-ink text-sm sm:text-base"><%= f.q %></span>
+              <span data-faq-icon class="shrink-0 text-xl text-ink-muted leading-none transition-transform duration-300">+</span>
+            </button>
+            <div class="overflow-hidden transition-all duration-300" style="max-height: 0;">
+              <p class="px-5 sm:px-6 pb-4 text-sm text-ink-secondary leading-relaxed"><%= f.a %></p>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- ============================= CTA FINAL ============================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
+      <div data-reveal>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-ink max-w-2xl mx-auto">
+          Dejá de perder cuotas en un cuaderno
+        </h2>
+        <p class="mt-3 text-ink-secondary">Probalo hoy — te toma menos de un minuto entrar a la demo.</p>
+        <a href="/admin/login?email=demo@pagadiario.com" class="mt-7 btn-primary text-base inline-flex">
+          Probar la demo gratis →
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================= FOOTER ============================= -->
+  <footer class="border-t border-line-subtle">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-brand text-white text-sm font-bold">$</span>
+        <span class="font-display text-sm font-semibold text-ink">Paga Diario</span>
+      </div>
+      <p class="text-xs text-ink-muted text-center">
+        &copy; <%= new Date().getFullYear() %> Paga Diario. Sistema de gestión de cartera de préstamos diarios.
+      </p>
+      <a href="/admin/login" class="text-xs font-medium text-ink-secondary hover:text-ink transition-colors">
+        Ya tengo cuenta →
+      </a>
+    </div>
+  </footer>
+
+  <script src="/js/landing.js" defer></script>
+</body>
+</html>
