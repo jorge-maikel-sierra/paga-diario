@@ -6,7 +6,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof io !== 'undefined') {
-        const socket = io();
+        // Expuesto en window para que otras páginas (ej. progreso de
+        // importación) puedan escuchar eventos sin abrir una segunda conexión.
+        const socket = window.socket = io();
         socket.on('payment:created', () => {
           const badge = document.getElementById('live-payments-badge');
           if (badge) {

@@ -1,0 +1,300 @@
+<%
+  const SHEET_LABELS = { client: 'Clientes', loan: 'Préstamos', payment: 'Pagos' };
+  const sumStatus = (sheetSummary, status) => sheetSummary?.[status] || 0;
+  const sheetTotal = (sheetSummary) =>
+    Object.values(sheetSummary || {}).reduce((acc, n) => acc + n, 0);
+  const availableSheets = ['client', 'loan', 'payment'].filter((s) => sheetTotal(summary[s]) > 0);
+%>
+<%- include('../../../layouts/header') %>
+
+<div class="p-4 sm:p-6 lg:p-8 space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <a href="/admin/imports" class="btn-back">←</a>
+      <div>
+        <h1 class="page-title"><%= batch.fileName %></h1>
+        <p class="page-subtitle">
+          <%= batch.totalRows %> filas ·
+          <span id="batch-status-label">
+            <% if (batch.status === 'PENDING') { %>Lista para confirmar
+            <% } else if (batch.status === 'PROCESSING') { %>Procesando…
+            <% } else if (batch.status === 'COMPLETED') { %>Completada
+            <% } else if (batch.status === 'COMPLETED_WITH_ERRORS') { %>Completada con errores
+            <% } else { %>Falló
+            <% } %>
+          </span>
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <% if (batch.errorRows > 0 || batch.status === 'PENDING') { %>
+        <a href="/admin/imports/<%= batch.id %>/errors.xlsx" class="btn-secondary whitespace-nowrap">
+          📥 Reporte de errores
+        </a>
+      <% } %>
+      <a href="/admin/imports/history" class="btn-secondary whitespace-nowrap">📜 Historial</a>
+    </div>
+  </div>
+
+  <!-- Banners de estado -->
+  <% if (flashSucess) { %>
+    <div id="flash-success" class="flash-success"><span class="text-success text-lg shrink-0">✅</span><p class="flash-success-text"><%= flashSucess %></p></div>
+  <% } %>
+  <% if (flashError) { %>
+    <div id="flash-error" class="flash-error"><span class="text-danger text-lg shrink-0">❌</span><p class="flash-error-text"><%= flashError %></p></div>
+  <% } %>
+
+  <!-- Resumen por hoja -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <% ['client', 'loan', 'payment'].forEach((sheet) => { %>
+      <% const s = summary[sheet]; const total = sheetTotal(s); %>
+      <div class="card p-5 <%= total === 0 ? 'opacity-40' : '' %>">
+        <p class="text-sm font-medium text-ink-secondary"><%= SHEET_LABELS[sheet] %></p>
+        <p class="mt-1 text-2xl font-display font-bold text-ink tabular-nums"><%= total %></p>
+        <div class="mt-2 flex flex-wrap gap-1.5 text-xs">
+          <% if (sumStatus(s, 'VALID')) { %><span class="badge-neutral"><%= sumStatus(s, 'VALID') %> por confirmar</span><% } %>
+          <% if (sumStatus(s, 'IMPORTED')) { %><span class="badge-success"><%= sumStatus(s, 'IMPORTED') %> importadas</span><% } %>
+          <% if (sumStatus(s, 'SKIPPED')) { %><span class="badge-warning"><%= sumStatus(s, 'SKIPPED') %> omitidas</span><% } %>
+          <% if (sumStatus(s, 'INVALID')) { %><span class="badge-danger"><%= sumStatus(s, 'INVALID') %> inválidas</span><% } %>
+          <% if (sumStatus(s, 'FAILED')) { %><span class="badge-danger"><%= sumStatus(s, 'FAILED') %> fallidas</span><% } %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Barra de progreso (solo mientras PROCESSING) -->
+  <div id="progress-card" class="card p-5 <%= batch.status === 'PROCESSING' ? '' : 'hidden' %>">
+    <div class="flex items-center justify-between mb-2">
+      <p class="text-sm font-medium text-ink">Procesando importación…</p>
+      <p id="progress-count" class="text-sm text-ink-secondary tabular-nums">
+        <%= batch.processedRows %> / <%= batch.totalRows %>
+      </p>
+    </div>
+    <div class="w-full bg-surface-hover rounded-full h-2.5">
+      <div id="progress-bar" class="bg-brand h-2.5 rounded-full transition-all"
+           style="width: <%= batch.totalRows > 0 ? Math.round((batch.processedRows / batch.totalRows) * 100) : 0 %>%"></div>
+    </div>
+  </div>
+
+  <!-- Confirmar (solo PENDING) -->
+  <% if (batch.status === 'PENDING') { %>
+    <div class="card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <p class="text-sm text-ink-secondary">
+        Revisá el detalle abajo. Las filas inválidas se pueden corregir sin resubir el archivo.
+        Al confirmar, solo se procesan las filas válidas.
+      </p>
+      <button type="button" id="confirm-btn" class="btn-primary whitespace-nowrap">
+        ✅ Confirmar importación
+      </button>
+    </div>
+  <% } %>
+
+  <!-- Tabs + tabla de filas -->
+  <% if (availableSheets.length > 0) { %>
+    <div class="card overflow-hidden">
+      <div class="border-b border-line-subtle px-3 flex gap-1" id="sheet-tabs">
+        <% availableSheets.forEach((sheet, i) => { %>
+          <button type="button" data-sheet-tab="<%= sheet %>"
+            class="px-4 py-3 text-sm font-medium border-b-2 transition-colors <%= i === 0 ? 'border-brand text-ink' : 'border-transparent text-ink-secondary hover:text-ink' %>">
+            <%= SHEET_LABELS[sheet] %> (<%= sheetTotal(summary[sheet]) %>)
+          </button>
+        <% }); %>
+      </div>
+      <div id="rows-table-container" class="overflow-x-auto min-h-[200px]">
+        <div class="p-10 text-center text-ink-muted text-sm">Cargando filas…</div>
+      </div>
+      <div id="rows-pagination" class="px-5 py-3 border-t border-line-subtle flex items-center justify-between text-sm text-ink-secondary"></div>
+    </div>
+  <% } %>
+
+</div>
+
+<!-- Modal genérico de corrección de fila -->
+<div id="edit-row-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+  <div class="card w-full max-w-lg p-6 max-h-[85vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display font-semibold text-ink">Corregir fila</h3>
+      <button type="button" id="edit-row-close" class="text-ink-muted hover:text-ink">✕</button>
+    </div>
+    <div id="edit-row-errors" class="mb-4"></div>
+    <form id="edit-row-form" class="space-y-3"></form>
+    <div class="mt-5 flex justify-end gap-2">
+      <button type="button" id="edit-row-cancel" class="btn-secondary">Cancelar</button>
+      <button type="submit" form="edit-row-form" class="btn-primary">Guardar y revalidar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const batchId = <%- JSON.stringify(batch.id) %>;
+  let batchStatus = <%- JSON.stringify(batch.status) %>;
+  let activeSheet = <%- JSON.stringify(availableSheets[0] || null) %>;
+  let activePage = 1;
+  let activeStatusFilter = '';
+
+  const tableContainer = document.getElementById('rows-table-container');
+  const paginationEl = document.getElementById('rows-pagination');
+
+  const STATUS_BADGE = {
+    VALID: 'badge-neutral', IMPORTED: 'badge-success', SKIPPED: 'badge-warning',
+    INVALID: 'badge-danger', FAILED: 'badge-danger',
+  };
+  const STATUS_LABEL = {
+    VALID: 'Por confirmar', IMPORTED: 'Importada', SKIPPED: 'Omitida',
+    INVALID: 'Inválida', FAILED: 'Falló',
+  };
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  async function loadRows(sheet, page) {
+    tableContainer.innerHTML = '<div class="p-10 text-center text-ink-muted text-sm">Cargando filas…</div>';
+    const url = `/admin/imports/${batchId}/rows?sheet=${sheet}&page=${page}`;
+    const res = await fetch(url);
+    const { data: rows, meta } = await res.json();
+    renderRows(rows);
+    renderPagination(meta);
+  }
+
+  function renderRows(rows) {
+    if (rows.length === 0) {
+      tableContainer.innerHTML = '<div class="p-10 text-center text-ink-muted text-sm">No hay filas en esta hoja</div>';
+      return;
+    }
+    const columns = Object.keys(rows[0].rawData);
+    const canEdit = batchStatus === 'PENDING';
+
+    let html = '<table class="table-base"><thead><tr><th>#</th>';
+    columns.forEach((c) => { html += `<th>${escapeHtml(c)}</th>`; });
+    html += '<th>Estado</th><th>Notas</th>' + (canEdit ? '<th></th>' : '') + '</tr></thead><tbody>';
+
+    rows.forEach((row) => {
+      const notes = [...(row.errors || []), ...(row.warnings || [])].join(' · ');
+      html += `<tr data-row-id="${row.id}">`;
+      html += `<td class="text-ink-muted">${row.rowNumber}</td>`;
+      columns.forEach((c) => { html += `<td>${escapeHtml(row.rawData[c])}</td>`; });
+      html += `<td><span class="${STATUS_BADGE[row.status] || 'badge-neutral'}">${STATUS_LABEL[row.status] || row.status}</span></td>`;
+      html += `<td class="text-xs text-ink-muted max-w-xs">${escapeHtml(notes)}</td>`;
+      if (canEdit && row.status === 'INVALID') {
+        html += `<td><button type="button" class="text-brand text-xs font-semibold hover:underline" data-edit-row="${row.id}">✏️ Corregir</button></td>`;
+      } else if (canEdit) {
+        html += '<td></td>';
+      }
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    tableContainer.innerHTML = html;
+
+    tableContainer.querySelectorAll('[data-edit-row]').forEach((btn) => {
+      btn.addEventListener('click', () => openEditModal(btn.dataset.editRow, rows.find((r) => r.id === btn.dataset.editRow)));
+    });
+  }
+
+  function renderPagination(meta) {
+    if (!meta || meta.totalPages <= 1) { paginationEl.innerHTML = ''; return; }
+    paginationEl.innerHTML = `
+      <span>Página ${meta.page} de ${meta.totalPages} (${meta.total} filas)</span>
+      <div class="flex gap-2">
+        <button type="button" id="page-prev" class="btn-secondary !px-3 !py-1.5 text-xs" ${meta.page <= 1 ? 'disabled' : ''}>← Anterior</button>
+        <button type="button" id="page-next" class="btn-secondary !px-3 !py-1.5 text-xs" ${meta.page >= meta.totalPages ? 'disabled' : ''}>Siguiente →</button>
+      </div>`;
+    document.getElementById('page-prev')?.addEventListener('click', () => { activePage -= 1; loadRows(activeSheet, activePage); });
+    document.getElementById('page-next')?.addEventListener('click', () => { activePage += 1; loadRows(activeSheet, activePage); });
+  }
+
+  document.querySelectorAll('[data-sheet-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-sheet-tab]').forEach((t) => t.classList.remove('border-brand', 'text-ink'));
+      document.querySelectorAll('[data-sheet-tab]').forEach((t) => t.classList.add('border-transparent', 'text-ink-secondary'));
+      tab.classList.remove('border-transparent', 'text-ink-secondary');
+      tab.classList.add('border-brand', 'text-ink');
+      activeSheet = tab.dataset.sheetTab;
+      activePage = 1;
+      loadRows(activeSheet, activePage);
+    });
+  });
+
+  // --- Modal de corrección ---
+  const modal = document.getElementById('edit-row-modal');
+  const form = document.getElementById('edit-row-form');
+  const errorsBox = document.getElementById('edit-row-errors');
+  let editingRowId = null;
+
+  function openEditModal(rowId, row) {
+    editingRowId = rowId;
+    errorsBox.innerHTML = (row.errors || [])
+      .map((e) => `<p class="text-sm text-danger">⚠ ${escapeHtml(e)}</p>`).join('');
+    form.innerHTML = Object.entries(row.rawData).map(([key, value]) => `
+      <div class="form-group">
+        <label class="form-label">${escapeHtml(key)}</label>
+        <input type="text" name="${escapeHtml(key)}" value="${escapeHtml(value)}" class="form-input">
+      </div>
+    `).join('');
+    modal.classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    modal.classList.add('hidden');
+    editingRowId = null;
+  }
+
+  document.getElementById('edit-row-close').addEventListener('click', closeEditModal);
+  document.getElementById('edit-row-cancel').addEventListener('click', closeEditModal);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawData = Object.fromEntries(new FormData(form).entries());
+    const res = await fetch(`/admin/imports/${batchId}/rows/${editingRowId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rawData }),
+    });
+    const json = await res.json();
+    if (json.error) {
+      alert('Error: ' + json.error.message);
+      return;
+    }
+    closeEditModal();
+    loadRows(activeSheet, activePage);
+    location.reload(); // refresca contadores del resumen por hoja
+  });
+
+  // --- Confirmar importación ---
+  document.getElementById('confirm-btn')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = 'Confirmando…';
+    const res = await fetch(`/admin/imports/${batchId}/confirm`, { method: 'POST' });
+    const json = await res.json();
+    if (json.error) {
+      alert('Error: ' + json.error.message);
+      btn.disabled = false;
+      btn.textContent = '✅ Confirmar importación';
+      return;
+    }
+    location.reload();
+  });
+
+  // --- Progreso en vivo ---
+  if (window.socket && batchStatus === 'PROCESSING') {
+    window.socket.on('import:progress', (payload) => {
+      if (payload.batchId !== batchId) return;
+      const pct = payload.totalRows > 0 ? Math.round((payload.processedRows / payload.totalRows) * 100) : 0;
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-count').textContent = `${payload.processedRows} / ${payload.totalRows}`;
+    });
+    window.socket.on('import:completed', (payload) => {
+      if (payload.batchId !== batchId) return;
+      location.reload();
+    });
+  }
+
+  loadRows(activeSheet, activePage);
+})();
+</script>
+
+<%- include('../../../layouts/footer') %>

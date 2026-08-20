@@ -45,31 +45,25 @@ describe('Integration Tests - Basic Functionality', () => {
 
   describe('Import Service', () => {
     it('las funciones del servicio están disponibles', async () => {
-      const { parseImportFile, executeImport } = await import(
-        '../../src/services/import.service.js'
-      );
+      const { createImportBatch, runImportBatch, retryRow, generateErrorReportBuffer, generateTemplate } =
+        await import('../../src/services/import.service.js');
 
-      expect(typeof parseImportFile).toBe('function');
-      expect(typeof executeImport).toBe('function');
+      expect(typeof createImportBatch).toBe('function');
+      expect(typeof runImportBatch).toBe('function');
+      expect(typeof retryRow).toBe('function');
+      expect(typeof generateErrorReportBuffer).toBe('function');
+      expect(typeof generateTemplate).toBe('function');
     });
   });
   describe('Validation Schemas', () => {
     it('esquemas de importación están disponibles', async () => {
-      const {
-        uploadFileSchema,
-        confirmImportSchema,
-        downloadTemplateSchema,
-        importClientSchema,
-        importLoanSchema,
-        importPaymentSchema,
-      } = await import('../../src/schemas/import.schema.js');
+      const { uploadFileSchema, updateBatchRowSchema, downloadTemplateSchema } = await import(
+        '../../src/schemas/import.schema.js'
+      );
 
       expect(uploadFileSchema).toBeDefined();
-      expect(confirmImportSchema).toBeDefined();
+      expect(updateBatchRowSchema).toBeDefined();
       expect(downloadTemplateSchema).toBeDefined();
-      expect(importClientSchema).toBeDefined();
-      expect(importLoanSchema).toBeDefined();
-      expect(importPaymentSchema).toBeDefined();
     });
   });
 
@@ -78,18 +72,24 @@ describe('Integration Tests - Basic Functionality', () => {
       const {
         showImportPage,
         uploadFile,
-        showPreview,
+        showBatch,
+        listBatchRows,
+        updateBatchRow,
         confirmImport,
-        showResults,
+        downloadErrorReport,
+        showHistory,
         downloadTemplate,
         uploadMiddleware,
       } = await import('../../src/controllers/import.controller.js');
 
       expect(typeof showImportPage).toBe('function');
       expect(typeof uploadFile).toBe('function');
-      expect(typeof showPreview).toBe('function');
+      expect(typeof showBatch).toBe('function');
+      expect(typeof listBatchRows).toBe('function');
+      expect(typeof updateBatchRow).toBe('function');
       expect(typeof confirmImport).toBe('function');
-      expect(typeof showResults).toBe('function');
+      expect(typeof downloadErrorReport).toBe('function');
+      expect(typeof showHistory).toBe('function');
       expect(typeof downloadTemplate).toBe('function');
       expect(uploadMiddleware).toBeDefined();
     });

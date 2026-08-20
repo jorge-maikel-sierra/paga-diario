@@ -52,6 +52,22 @@ enum IncidentType {
   OTHER
 }
 
+enum ImportBatchStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+}
+
+enum ImportRowStatus {
+  VALID
+  INVALID
+  IMPORTED
+  SKIPPED
+  FAILED
+}
+
 // ============================================
 // MODELOS
 // ============================================
@@ -78,10 +94,11 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  users   User[]
-  routes  Route[]
-  loans   Loan[]
-  clients Client[]
+  users         User[]
+  routes        Route[]
+  loans         Loan[]
+  clients       Client[]
+  importBatches ImportBatch[]
 
   @@map("organizations")
 }
@@ -101,12 +118,13 @@ model User {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  organization Organization  @relation(fields: [organizationId], references: [id])
-  routes       Route[]
-  loans        Loan[]
-  payments     Payment[]
-  incidents    Incident[]
-  gpsLocations GpsLocation[]
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  routes        Route[]
+  loans         Loan[]
+  payments      Payment[]
+  incidents     Incident[]
+  gpsLocations  GpsLocation[]
+  importBatches ImportBatch[]
 
   @@index([organizationId])
   @@index([email])
@@ -255,6 +273,11 @@ model Payment {
   loanId            String   @map("loan_id") @db.Uuid
   paymentScheduleId String?  @map("payment_schedule_id") @db.Uuid
   collectorId       String   @map("collector_id") @db.Uuid
+  // ID del sistema de origen — permite detectar duplicados al re-importar
+  // el mismo archivo de pagos. NULL no colisiona en el unique constraint,
+  // así que pagos sin ID externo no participan del chequeo (usan heurística
+  // por loan+monto+fecha en import.service.js en su lugar).
+  externalPaymentId String?  @map("external_payment_id") @db.VarChar(100)
 
   // --- Campos monetarios ---
   amount            Decimal  @map("amount") @db.Decimal(14, 2)
@@ -278,6 +301,7 @@ model Payment {
   paymentSchedule PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
   collector       User             @relation(fields: [collectorId], references: [id])
 
+  @@unique([loanId, externalPaymentId])
   @@index([loanId])
   @@index([paymentScheduleId])
   @@index([collectorId])
@@ -321,4 +345,48 @@ model GpsLocation {
   @@index([collectorId])
   @@index([recordedAt])
   @@map("gps_locations")
+}
+
+/// Lote de importación masiva (Excel/CSV) — historial y auditoría
+model ImportBatch {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  fileName       String            @map("file_name") @db.VarChar(255)
+  status         ImportBatchStatus @default(PENDING)
+  totalRows      Int               @default(0) @map("total_rows")
+  processedRows  Int               @default(0) @map("processed_rows")
+  successRows    Int               @default(0) @map("success_rows")
+  errorRows      Int               @default(0) @map("error_rows")
+  startedAt      DateTime?         @map("started_at")
+  completedAt    DateTime?         @map("completed_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  rows         ImportRow[]
+
+  @@index([organizationId, createdAt])
+  @@map("import_batches")
+}
+
+/// Fila individual de un lote de importación — una por cliente/préstamo/pago procesado
+model ImportRow {
+  id         String          @id @default(uuid()) @db.Uuid
+  batchId    String          @map("batch_id") @db.Uuid
+  sheetType  String          @map("sheet_type") @db.VarChar(20)
+  rowNumber  Int             @map("row_number")
+  status     ImportRowStatus
+  rawData    Json            @map("raw_data")
+  parsedData Json?           @map("parsed_data")
+  errors     Json?
+  warnings   Json?
+  entityId   String?         @map("entity_id") @db.Uuid
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+
+  batch ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, sheetType, status])
+  @@map("import_rows")
 }

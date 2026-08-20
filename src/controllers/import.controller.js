@@ -1,32 +1,30 @@
 import { createRequire } from 'module';
 import path from 'path';
+import { Queue } from 'bullmq';
 import asyncHandler from '../utils/asyncHandler.js';
 import * as apiResponse from '../utils/apiResponse.js';
 import * as importService from '../services/import.service.js';
+import prisma from '../config/prisma.js';
+import redisClient from '../config/redis.js';
 
 // multer v2 es un módulo CJS — se importa con createRequire para compatibilidad ESM
 const require = createRequire(import.meta.url);
 const multer = require('multer');
 
-// Configuración de multer para archivos de importación
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB máximo
-  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB máximo
   fileFilter: (req, file, cb) => {
     const allowedExtensions = ['.xlsx', '.xls', '.csv'];
     const extension = path.extname(file.originalname).toLowerCase();
 
-    // Los navegadores reportan mimetypes distintos según el SO/versión;
-    // validamos por extensión como fuente de verdad y aceptamos octet-stream como fallback seguro.
     const allowedMimetypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx (estándar)
-      'application/vnd.ms-excel', // .xls (estándar)
-      'text/csv', // .csv (estándar)
-      'application/csv', // .csv (variante)
-      'text/plain', // .csv enviado como texto plano por algunos OS
-      'application/octet-stream', // fallback genérico de macOS/Windows
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv',
+      'application/csv',
+      'text/plain',
+      'application/octet-stream',
     ];
 
     const extensionAllowed = allowedExtensions.includes(extension);
@@ -35,7 +33,6 @@ const upload = multer({
     if (extensionAllowed && mimetypeAllowed) {
       cb(null, true);
     } else if (extensionAllowed && !mimetypeAllowed) {
-      // Extensión correcta pero mimetype inesperado: aceptar con advertencia de log
       console.warn(
         `[Import] Mimetype inesperado "${file.mimetype}" para extensión "${extension}" — aceptado por extensión`,
       );
@@ -46,12 +43,21 @@ const upload = multer({
   },
 });
 
+/** Trae un batch verificando que pertenezca a la organización del usuario. */
+const findOwnedBatch = async (batchId, organizationId) => {
+  const batch = await prisma.importBatch.findFirst({ where: { id: batchId, organizationId } });
+  if (!batch) {
+    const err = new Error('Lote de importación no encontrado');
+    err.statusCode = 404;
+    err.isOperational = true;
+    throw err;
+  }
+  return batch;
+};
+
 /**
  * GET /admin/imports
  * Renderiza la página principal de importación con formulario de upload.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
  */
 export const showImportPage = asyncHandler(async (req, res) => {
   res.render('pages/admin/imports/upload', {
@@ -63,227 +69,198 @@ export const showImportPage = asyncHandler(async (req, res) => {
 
 /**
  * POST /admin/imports/upload
- * Procesa el archivo subido y genera preview de validación.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * Parsea el archivo y crea el lote de importación (persistido en BD).
  */
 export const uploadFile = asyncHandler(async (req, res) => {
   if (!req.file) {
     return apiResponse.error(res, 'No se recibió ningún archivo', 400);
   }
 
+  const extension = path.extname(req.file.originalname).toLowerCase();
+
   try {
-    const preview = await importService.parseImportFile(req.file.buffer, req.file.originalname);
+    const { batchId, summary } = await importService.createImportBatch({
+      organizationId: req.user.organizationId,
+      userId: req.user.id,
+      fileBuffer: req.file.buffer,
+      fileName: req.file.originalname,
+      extension,
+    });
 
-    // Guardar preview en session para confirmación posterior
-    req.session.importPreview = preview;
-
-    return apiResponse.success(res, preview, 200);
+    return apiResponse.success(res, { batchId, summary }, 201);
   } catch (error) {
     return apiResponse.error(res, error.message, 400);
   }
 });
 
 /**
- * GET /admin/imports/preview
- * Renderiza la página de preview con resultados de validación.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * GET /admin/imports/:batchId
+ * Página única de detalle del lote — preview, progreso en vivo o resultados
+ * finales, según el status del batch.
  */
-export const showPreview = asyncHandler(async (req, res) => {
-  const preview = req.session.importPreview;
+export const showBatch = asyncHandler(async (req, res) => {
+  const { flashSucess, flashError } = req.session;
+  delete req.session.flashSucess;
+  delete req.session.flashError;
 
-  if (!preview) {
-    req.flash('error', 'No hay datos de importación para mostrar');
-    return res.redirect('/admin/imports');
-  }
+  const batch = await findOwnedBatch(req.params.batchId, req.user.organizationId);
 
-  return res.render('pages/admin/imports/preview', {
-    title: 'Preview de Importación',
+  const rowsBySheet = await prisma.importRow.groupBy({
+    by: ['sheetType', 'status'],
+    where: { batchId: batch.id },
+    _count: true,
+  });
+
+  const summary = { client: {}, loan: {}, payment: {} };
+  rowsBySheet.forEach((r) => {
+    summary[r.sheetType][r.status] = r._count;
+  });
+
+  return res.render('pages/admin/imports/batch', {
+    title: 'Importación de Datos',
     user: req.user,
     currentPath: '/admin/imports',
-    preview,
+    batch,
+    summary,
+    flashSucess,
+    flashError,
   });
 });
 
 /**
- * POST /admin/imports/confirm
- * Ejecuta la importación confirmada y muestra resultados.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * GET /admin/imports/:batchId/rows?sheet=client&status=invalid&page=1
+ * Paginación real de filas del lote (reemplaza el .slice(0,50) del preview
+ * en sesión).
+ */
+export const listBatchRows = asyncHandler(async (req, res) => {
+  const batch = await findOwnedBatch(req.params.batchId, req.user.organizationId);
+
+  const { sheet, status } = req.query;
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const pageSize = 25;
+
+  const where = {
+    batchId: batch.id,
+    ...(sheet && { sheetType: sheet }),
+    ...(status && { status: status.toUpperCase() }),
+  };
+
+  const [rows, total] = await Promise.all([
+    prisma.importRow.findMany({
+      where,
+      orderBy: { rowNumber: 'asc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.importRow.count({ where }),
+  ]);
+
+  return apiResponse.success(res, rows, 200, { page, pageSize, total, totalPages: Math.ceil(total / pageSize) });
+});
+
+/**
+ * PATCH /admin/imports/:batchId/rows/:rowId
+ * Corrige y revalida una fila puntual sin resubir el archivo.
+ */
+export const updateBatchRow = asyncHandler(async (req, res) => {
+  await findOwnedBatch(req.params.batchId, req.user.organizationId);
+
+  const row = await prisma.importRow.findFirst({
+    where: { id: req.params.rowId, batchId: req.params.batchId },
+  });
+  if (!row) {
+    return apiResponse.error(res, 'Fila no encontrada', 404);
+  }
+
+  const updated = await importService.retryRow(row.id, req.body.rawData);
+  return apiResponse.success(res, updated, 200);
+});
+
+/**
+ * POST /admin/imports/:batchId/confirm
+ * Ejecuta el lote — en segundo plano (BullMQ) si Redis está disponible,
+ * o de forma síncrona en el request si la organización corre sin Redis.
  */
 export const confirmImport = asyncHandler(async (req, res) => {
-  const preview = req.session.importPreview;
+  const batch = await findOwnedBatch(req.params.batchId, req.user.organizationId);
 
-  if (!preview) {
-    return apiResponse.error(res, 'No hay datos de importación para procesar', 400);
+  if (batch.status !== 'PENDING') {
+    return apiResponse.error(res, 'Este lote ya fue procesado', 400);
   }
 
-  try {
-    const results = await importService.executeImport(req.user.organizationId, preview);
-
-    // Limpiar preview y guardar resultados en sesión para que showResults los muestre
-    delete req.session.importPreview;
-    req.session.importResults = results;
-
-    return apiResponse.success(res, results, 200);
-  } catch (error) {
-    return apiResponse.error(res, `Error en importación: ${error.message}`, 500);
+  if (redisClient) {
+    const queue = new Queue('import-processing', { connection: redisClient });
+    await queue.add('run-batch', { batchId: batch.id });
+    await queue.close();
+    return apiResponse.success(res, { batchId: batch.id, queued: true }, 202);
   }
+
+  const result = await importService.runImportBatch(batch.id);
+  return apiResponse.success(res, { batchId: batch.id, queued: false, batch: result }, 200);
 });
 
 /**
- * GET /admin/imports/results
- * Renderiza la página de resultados de importación.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * GET /admin/imports/:batchId/errors.xlsx
+ * Descarga un reporte Excel con solo las filas fallidas/inválidas del lote.
  */
-export const showResults = asyncHandler(async (req, res) => {
-  // Los resultados deben pasarse como query params o session
-  const results = req.session.importResults || req.query.results;
+export const downloadErrorReport = asyncHandler(async (req, res) => {
+  const batch = await findOwnedBatch(req.params.batchId, req.user.organizationId);
 
-  if (!results) {
-    req.flash('error', 'No hay resultados de importación para mostrar');
-    return res.redirect('/admin/imports');
-  }
+  const buffer = await importService.generateErrorReportBuffer(batch.id);
 
-  const parsedResults = typeof results === 'string' ? JSON.parse(results) : results;
+  res.setHeader('Content-Disposition', `attachment; filename="errores_${batch.fileName}.xlsx"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  return res.send(buffer);
+});
 
-  // Limpiar resultados de la sesión después de mostrarlos
-  if (req.session.importResults) {
-    delete req.session.importResults;
-  }
+/**
+ * GET /admin/imports/history
+ * Historial paginado de lotes de importación de la organización.
+ */
+export const showHistory = asyncHandler(async (req, res) => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const pageSize = 20;
 
-  return res.render('pages/admin/imports/results', {
-    title: 'Resultados de Importación',
+  const [batches, total] = await Promise.all([
+    prisma.importBatch.findMany({
+      where: { organizationId: req.user.organizationId },
+      include: { user: { select: { firstName: true, lastName: true } } },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.importBatch.count({ where: { organizationId: req.user.organizationId } }),
+  ]);
+
+  return res.render('pages/admin/imports/history', {
+    title: 'Historial de Importaciones',
     user: req.user,
     currentPath: '/admin/imports',
-    results: parsedResults,
+    batches,
+    page,
+    totalPages: Math.ceil(total / pageSize),
   });
 });
-
-/**
- * Genera una plantilla Excel con headers ejemplo.
- *
- * @param {string} type - Tipo de plantilla (complete, clients, loans, payments)
- * @returns {Promise<Buffer>}
- */
-const generateTemplate = async (type) => {
-  const ExcelJS = (await import('exceljs')).default;
-  const workbook = new ExcelJS.Workbook();
-
-  if (type === 'complete' || type === 'clients') {
-    const clientSheet = workbook.addWorksheet('clientes');
-    clientSheet.addRow([
-      'external_client_id',
-      'nombres',
-      'apellidos',
-      'tipo_documento',
-      'numero_documento',
-      'telefono',
-      'direccion',
-      'ruta',
-      'activo',
-    ]);
-
-    // Fila ejemplo
-    clientSheet.addRow([
-      'CLI001',
-      'Juan Carlos',
-      'Pérez González',
-      'CC',
-      '12345678',
-      '3001234567',
-      'Calle 123 #45-67',
-      'Ruta Centro',
-      true,
-    ]);
-  }
-
-  if (type === 'complete' || type === 'loans') {
-    const loanSheet = workbook.addWorksheet('prestamos');
-    loanSheet.addRow([
-      'external_loan_id',
-      'external_client_id',
-      'principal',
-      'tasa_mensual',
-      'plazo_meses',
-      'fecha_desembolso',
-      'frecuencia',
-      'cobrador',
-      'estado',
-      'notas',
-    ]);
-
-    // Fila ejemplo
-    loanSheet.addRow([
-      'LOAN001',
-      'CLI001',
-      500000,
-      0.03,
-      12,
-      '2026-04-06',
-      'MONTHLY',
-      'cobrador@empresa.com',
-      'ACTIVE',
-      'Préstamo ejemplo',
-    ]);
-  }
-
-  if (type === 'complete' || type === 'payments') {
-    const paymentSheet = workbook.addWorksheet('pagos');
-    paymentSheet.addRow(['external_loan_id', 'monto', 'fecha_pago', 'metodo', 'cobrador', 'notas']);
-
-    // Fila ejemplo
-    paymentSheet.addRow([
-      'LOAN001',
-      50000,
-      '2026-04-06',
-      'CASH',
-      'cobrador@empresa.com',
-      'Pago inicial',
-    ]);
-  }
-
-  return workbook.xlsx.writeBuffer();
-};
 
 /**
  * GET /admin/imports/download-template
- * Descarga una plantilla Excel para importación.
- *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * Descarga una plantilla Excel para importación (con instrucciones y
+ * validación de datos).
  */
 export const downloadTemplate = asyncHandler(async (req, res) => {
   const templateType = req.query.type || 'complete';
 
-  // Configurar headers para descarga
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="plantilla_importacion_${templateType}.xlsx"`,
-  );
-  res.setHeader(
-    'Content-Type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  );
+  res.setHeader('Content-Disposition', `attachment; filename="plantilla_importacion_${templateType}.xlsx"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
   try {
-    const templateBuffer = await generateTemplate(templateType);
+    const templateBuffer = await importService.generateTemplate(templateType);
     return res.send(templateBuffer);
   } catch (error) {
     return apiResponse.error(res, `Error generando plantilla: ${error.message}`, 500);
   }
 });
 
-/**
- * Middleware de multer para manejo de archivos.
- * TODO: Descomentar cuando se instale multer
- */
 /**
  * Middleware de multer para upload de archivos de importación.
  * Acepta un solo archivo con el nombre 'importFile'.

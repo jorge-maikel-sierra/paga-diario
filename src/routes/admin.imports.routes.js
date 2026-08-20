@@ -3,47 +3,49 @@ import validate from '../middleware/validate.js';
 import {
   showImportPage,
   uploadFile,
-  showPreview,
+  showBatch,
+  listBatchRows,
+  updateBatchRow,
   confirmImport,
-  showResults,
+  downloadErrorReport,
+  showHistory,
   downloadTemplate,
   uploadMiddleware,
 } from '../controllers/import.controller.js';
-import {
-  uploadFileSchema,
-  confirmImportSchema,
-  downloadTemplateSchema,
-} from '../schemas/import.schema.js';
+import { uploadFileSchema, updateBatchRowSchema, downloadTemplateSchema } from '../schemas/import.schema.js';
 
 // ============================================
-// Admin Imports Router — Pago Ya
+// Admin Imports Router — Paga Diario
 // Ruta base (montaje): /admin/imports
 // ============================================
 
 const router = Router();
 
 // GET /admin/imports
-// Página principal de importación con formulario de upload
 router.get('/', showImportPage);
 
-// POST /admin/imports/upload
-// Procesar archivo subido y generar preview
-router.post('/upload', uploadMiddleware, validate(uploadFileSchema), uploadFile);
-
-// GET /admin/imports/preview
-// Mostrar preview de validación de datos
-router.get('/preview', showPreview);
-
-// POST /admin/imports/confirm
-// Confirmar y ejecutar importación
-router.post('/confirm', validate(confirmImportSchema), confirmImport);
-
-// GET /admin/imports/results
-// Mostrar resultados de importación ejecutada
-router.get('/results', showResults);
+// GET /admin/imports/history — debe ir antes de /:batchId para no colisionar
+router.get('/history', showHistory);
 
 // GET /admin/imports/download-template
-// Descargar plantilla Excel para importación
 router.get('/download-template', validate(downloadTemplateSchema), downloadTemplate);
+
+// POST /admin/imports/upload
+router.post('/upload', uploadMiddleware, validate(uploadFileSchema), uploadFile);
+
+// GET /admin/imports/:batchId — página de detalle (preview/progreso/resultados)
+router.get('/:batchId', showBatch);
+
+// GET /admin/imports/:batchId/rows — paginación de filas
+router.get('/:batchId/rows', listBatchRows);
+
+// PATCH /admin/imports/:batchId/rows/:rowId — corregir una fila sin resubir
+router.patch('/:batchId/rows/:rowId', validate(updateBatchRowSchema), updateBatchRow);
+
+// POST /admin/imports/:batchId/confirm — ejecuta el lote
+router.post('/:batchId/confirm', confirmImport);
+
+// GET /admin/imports/:batchId/errors.xlsx — reporte de errores descargable
+router.get('/:batchId/errors.xlsx', downloadErrorReport);
 
 export default router;

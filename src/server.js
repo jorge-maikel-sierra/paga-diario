@@ -12,7 +12,9 @@ import { initTelegramBot } from './config/telegram.js';
 import startTelegramWorker from './jobs/telegramWorker.js';
 import startMoraWorker from './jobs/moraWorker.js';
 import startPdfWorker from './jobs/pdfWorker.js';
+import startImportWorker from './jobs/importWorker.js';
 import scheduleMoraJobs from './jobs/mora.scheduler.js';
+import { setIO } from './config/socket.js';
 
 // ============================================
 // CONFIGURACIÓN
@@ -35,8 +37,11 @@ const io = new SocketServer(httpServer, {
   transports: ['websocket', 'polling'],
 });
 
-// Exponer io en la app para uso en controladores / servicios
+// Exponer io en la app para uso en controladores / servicios, y en el
+// singleton de src/config/socket.js para uso en workers de BullMQ (que no
+// tienen acceso a `req.app`).
 app.set('io', io);
+setIO(io);
 
 io.on('connection', (socket) => {
   console.log(`[Socket.io] Cliente conectado: ${socket.id}`);
@@ -53,6 +58,7 @@ io.on('connection', (socket) => {
 let telegramWorker;
 let moraWorker;
 let pdfWorker;
+let importWorker;
 
 /**
  * Inicia los workers de BullMQ para procesar colas en segundo plano.
@@ -61,6 +67,7 @@ const startWorkers = () => {
   telegramWorker = startTelegramWorker();
   moraWorker = startMoraWorker();
   pdfWorker = startPdfWorker();
+  importWorker = startImportWorker();
 };
 
 // ============================================
@@ -89,6 +96,7 @@ const shutdown = async (signal) => {
     if (telegramWorker) await telegramWorker.close();
     if (moraWorker) await moraWorker.close();
     if (pdfWorker) await pdfWorker.close();
+    if (importWorker) await importWorker.close();
     console.log('[Server] Workers cerrados');
   } catch (err) {
     console.error('[Server] Error cerrando workers:', err.message);

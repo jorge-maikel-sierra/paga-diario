@@ -3,41 +3,46 @@
 <div class="p-4 sm:p-6 lg:p-8 space-y-6">
 
   <!-- Header -->
-  <div class="flex items-center gap-4">
-    <a href="/admin/dashboard" class="text-gray-400 hover:text-brand-navy transition-colors">
-      ← Volver
-    </a>
-    <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Importar Datos</h1>
-      <p class="text-sm text-gray-500 mt-1">Subir archivos Excel o CSV para importar clientes, préstamos y pagos</p>
+  <div class="flex items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <a href="/admin/dashboard" class="text-ink-muted hover:text-ink transition-colors">
+        ← Volver
+      </a>
+      <div>
+        <h1 class="text-2xl font-bold text-ink">Importar Datos</h1>
+        <p class="text-sm text-ink-secondary mt-1">Subir archivos Excel o CSV para importar clientes, préstamos y pagos</p>
+      </div>
     </div>
+    <a href="/admin/imports/history" class="btn-secondary whitespace-nowrap">
+      📜 Ver historial
+    </a>
   </div>
 
   <!-- Upload Form -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+  <div class="bg-surface rounded-xl border border-line shadow-sm">
     
     <!-- Steps indicator -->
-    <div class="border-b border-gray-200 p-6">
+    <div class="border-b border-line p-6">
       <div class="flex items-center space-x-4">
         <div class="flex items-center">
-          <div class="flex items-center justify-center w-8 h-8 bg-brand-navy text-white rounded-full text-sm font-medium">
+          <div class="flex items-center justify-center w-8 h-8 bg-action text-action-on rounded-full text-sm font-medium">
             1
           </div>
-          <span class="ml-2 text-sm font-medium text-brand-navy">Subir archivo</span>
+          <span class="ml-2 text-sm font-medium text-ink">Subir archivo</span>
         </div>
-        <div class="flex-1 border-t border-gray-300"></div>
+        <div class="flex-1 border-t border-line"></div>
         <div class="flex items-center">
-          <div class="flex items-center justify-center w-8 h-8 bg-gray-200 text-gray-600 rounded-full text-sm font-medium">
+          <div class="flex items-center justify-center w-8 h-8 bg-surface-hover text-ink-secondary rounded-full text-sm font-medium">
             2
           </div>
-          <span class="ml-2 text-sm text-gray-600">Preview</span>
+          <span class="ml-2 text-sm text-ink-secondary">Preview</span>
         </div>
-        <div class="flex-1 border-t border-gray-300"></div>
+        <div class="flex-1 border-t border-line"></div>
         <div class="flex items-center">
-          <div class="flex items-center justify-center w-8 h-8 bg-gray-200 text-gray-600 rounded-full text-sm font-medium">
+          <div class="flex items-center justify-center w-8 h-8 bg-surface-hover text-ink-secondary rounded-full text-sm font-medium">
             3
           </div>
-          <span class="ml-2 text-sm text-gray-600">Confirmar</span>
+          <span class="ml-2 text-sm text-ink-secondary">Confirmar</span>
         </div>
       </div>
     </div>
@@ -48,29 +53,29 @@
         
         <!-- File upload area -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-ink mb-2">
             Archivo de importación <span class="text-red-500">*</span>
           </label>
-          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-line border-dashed rounded-lg hover:border-line transition-colors">
             <div class="space-y-1 text-center">
-              <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <svg class="mx-auto h-12 w-12 text-ink-muted" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              <div class="flex text-sm text-gray-600">
-                <label for="importFile" class="relative cursor-pointer bg-white rounded-md font-medium text-brand-navy hover:text-brand-navy-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brand-navy">
+              <div class="flex text-sm text-ink-secondary">
+                <label for="importFile" class="relative cursor-pointer bg-surface rounded-md font-medium text-ink hover:text-ink-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brand-navy">
                   <span>Subir archivo</span>
                   <input id="importFile" name="importFile" type="file" accept=".xlsx,.xls,.csv" class="sr-only" required>
                 </label>
                 <p class="pl-1">o arrastra y suelta</p>
               </div>
-              <p class="text-xs text-gray-500">Excel (.xlsx, .xls) o CSV hasta 10MB</p>
+              <p class="text-xs text-ink-secondary">Excel (.xlsx, .xls) o CSV hasta 10MB</p>
             </div>
           </div>
-          <div id="fileName" class="mt-2 text-sm text-gray-600 hidden"></div>
+          <div id="fileName" class="mt-2 text-sm text-ink-secondary hidden"></div>
         </div>
 
         <!-- Instructions -->
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+        <div class="bg-info/10 border-l-4 border-info p-4">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -86,17 +91,17 @@
                    class="text-sm text-blue-600 hover:text-blue-500 underline">
                   📥 Descargar plantilla completa
                 </a>
-                <span class="mx-2 text-gray-400">|</span>
+                <span class="mx-2 text-ink-muted">|</span>
                 <a href="/admin/imports/download-template?type=clients" 
                    class="text-sm text-blue-600 hover:text-blue-500 underline">
                   Plantilla clientes
                 </a>
-                <span class="mx-2 text-gray-400">|</span>
+                <span class="mx-2 text-ink-muted">|</span>
                 <a href="/admin/imports/download-template?type=loans" 
                    class="text-sm text-blue-600 hover:text-blue-500 underline">
                   Plantilla préstamos
                 </a>
-                <span class="mx-2 text-gray-400">|</span>
+                <span class="mx-2 text-ink-muted">|</span>
                 <a href="/admin/imports/download-template?type=payments" 
                    class="text-sm text-blue-600 hover:text-blue-500 underline">
                   Plantilla pagos
@@ -179,8 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (data.error) {
         throw new Error(data.error.message || 'Error procesando archivo');
       }
-      // Redirigir a preview con los datos ya guardados en sesión
-      window.location.href = '/admin/imports/preview';
+      // Redirigir al detalle del lote recién creado
+      window.location.href = '/admin/imports/' + data.data.batchId;
     })
     .catch(error => {
       alert('Error: ' + error.message);
