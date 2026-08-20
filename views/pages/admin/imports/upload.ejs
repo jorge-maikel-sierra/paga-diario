@@ -3,17 +3,15 @@
 <div class="p-4 sm:p-6 lg:p-8 space-y-6">
 
   <!-- Header -->
-  <div class="flex items-center justify-between gap-4">
-    <div class="flex items-center gap-4">
-      <a href="/admin/dashboard" class="text-ink-muted hover:text-ink transition-colors">
-        ← Volver
-      </a>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="page-header">
+      <a href="/admin/dashboard" class="btn-back">←</a>
       <div>
-        <h1 class="text-2xl font-bold text-ink">Importar Datos</h1>
-        <p class="text-sm text-ink-secondary mt-1">Subir archivos Excel o CSV para importar clientes, préstamos y pagos</p>
+        <h1 class="page-title">Importar Datos</h1>
+        <p class="page-subtitle">Subir archivos Excel o CSV para importar clientes, préstamos y pagos</p>
       </div>
     </div>
-    <a href="/admin/imports/history" class="btn-secondary whitespace-nowrap">
+    <a href="/admin/imports/history" class="btn-secondary whitespace-nowrap self-start sm:self-auto">
       📜 Ver historial
     </a>
   </div>
@@ -56,13 +54,13 @@
           <label class="block text-sm font-medium text-ink mb-2">
             Archivo de importación <span class="text-red-500">*</span>
           </label>
-          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-line border-dashed rounded-lg hover:border-line transition-colors">
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-line border-dashed rounded-lg hover:border-brand/50 transition-colors">
             <div class="space-y-1 text-center">
               <svg class="mx-auto h-12 w-12 text-ink-muted" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               <div class="flex text-sm text-ink-secondary">
-                <label for="importFile" class="relative cursor-pointer bg-surface rounded-md font-medium text-ink hover:text-ink-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brand-navy">
+                <label for="importFile" class="relative cursor-pointer bg-surface rounded-md font-medium text-brand hover:text-brand-strong focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brand">
                   <span>Subir archivo</span>
                   <input id="importFile" name="importFile" type="file" accept=".xlsx,.xls,.csv" class="sr-only" required>
                 </label>
@@ -75,35 +73,35 @@
         </div>
 
         <!-- Instructions -->
-        <div class="bg-info/10 border-l-4 border-info p-4">
+        <div class="bg-info/10 border-l-4 border-info rounded-r-lg p-4">
           <div class="flex">
             <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg class="h-5 w-5 text-info" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
               </svg>
             </div>
             <div class="ml-3">
-              <p class="text-sm text-blue-700">
-                <strong>Formato esperado:</strong> El archivo Excel debe contener hojas llamadas 'clientes', 'prestamos' y/o 'pagos' con las columnas correctas.
+              <p class="text-sm text-ink-secondary">
+                <strong class="text-ink">Formato esperado:</strong> El archivo Excel debe contener hojas llamadas 'clientes', 'prestamos' y/o 'pagos' con las columnas correctas.
               </p>
-              <div class="mt-2">
-                <a href="/admin/imports/download-template?type=complete" 
-                   class="text-sm text-blue-600 hover:text-blue-500 underline">
+              <div class="mt-2 flex flex-wrap gap-x-1 gap-y-1">
+                <a href="/admin/imports/download-template?type=complete"
+                   class="text-sm text-brand hover:text-brand-strong underline underline-offset-2">
                   📥 Descargar plantilla completa
                 </a>
-                <span class="mx-2 text-ink-muted">|</span>
-                <a href="/admin/imports/download-template?type=clients" 
-                   class="text-sm text-blue-600 hover:text-blue-500 underline">
+                <span class="mx-1 text-ink-muted">·</span>
+                <a href="/admin/imports/download-template?type=clients"
+                   class="text-sm text-brand hover:text-brand-strong underline underline-offset-2">
                   Plantilla clientes
                 </a>
-                <span class="mx-2 text-ink-muted">|</span>
-                <a href="/admin/imports/download-template?type=loans" 
-                   class="text-sm text-blue-600 hover:text-blue-500 underline">
+                <span class="mx-1 text-ink-muted">·</span>
+                <a href="/admin/imports/download-template?type=loans"
+                   class="text-sm text-brand hover:text-brand-strong underline underline-offset-2">
                   Plantilla préstamos
                 </a>
-                <span class="mx-2 text-ink-muted">|</span>
-                <a href="/admin/imports/download-template?type=payments" 
-                   class="text-sm text-blue-600 hover:text-blue-500 underline">
+                <span class="mx-1 text-ink-muted">·</span>
+                <a href="/admin/imports/download-template?type=payments"
+                   class="text-sm text-brand hover:text-brand-strong underline underline-offset-2">
                   Plantilla pagos
                 </a>
               </div>
@@ -113,15 +111,15 @@
 
         <!-- Submit button -->
         <div class="flex justify-end">
-          <button type="submit" 
+          <button type="submit"
                   id="submitBtn"
                   disabled
-                  class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-gray-400 cursor-not-allowed disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-navy">
-            <svg class="hidden animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  class="btn-primary">
+            <svg class="hidden animate-spin -ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span> Procesar archivo</span>
+            <span>Procesar archivo</span>
           </button>
         </div>
       </form>
@@ -143,16 +141,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (file) {
       fileName.textContent = `Archivo seleccionado: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
       fileName.classList.remove('hidden');
-      
-      // Enable submit button
       submitBtn.disabled = false;
-      submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed', 'disabled:bg-gray-400');
-      submitBtn.classList.add('bg-brand-navy', 'hover:bg-brand-navy-dark');
     } else {
       fileName.classList.add('hidden');
       submitBtn.disabled = true;
-      submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed', 'disabled:bg-gray-400');
-      submitBtn.classList.remove('bg-brand-navy', 'hover:bg-brand-navy-dark');
     }
   });
 
@@ -165,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show loading state
     if (spinner) spinner.classList.remove('hidden');
-    submitBtn.lastChild.textContent = ' Procesando...';
+    submitBtn.lastChild.textContent = 'Procesando...';
     submitBtn.disabled = true;
     
     fetch('/admin/imports/upload', {
@@ -191,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Error: ' + error.message);
       // Reset button state
       if (spinner) spinner.classList.add('hidden');
-      submitBtn.lastChild.textContent = ' Procesar archivo';
+      submitBtn.lastChild.textContent = 'Procesar archivo';
       submitBtn.disabled = false;
     });
   });
@@ -217,11 +209,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function highlight(e) {
-    dropZone.classList.add('border-brand-navy');
+    dropZone.classList.add('border-brand', 'bg-brand/5');
   }
 
   function unhighlight(e) {
-    dropZone.classList.remove('border-brand-navy');
+    dropZone.classList.remove('border-brand', 'bg-brand/5');
   }
 
   dropZone.addEventListener('drop', handleDrop, false);
