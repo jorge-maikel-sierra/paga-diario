@@ -7,6 +7,7 @@ const serviceModules = [
   '../../src/services/client.service.js',
   '../../src/services/collector.service.js',
   '../../src/services/excel.service.js',
+  '../../src/services/expense.service.js',
   '../../src/services/health.service.js',
   '../../src/services/loan.service.js',
   '../../src/services/notification.service.js',

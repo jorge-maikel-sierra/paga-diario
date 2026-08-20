@@ -10,6 +10,7 @@ import * as organizationService from '../services/organization.service.js';
 import * as routeService from '../services/route.service.js';
 import * as reportService from '../services/report.service.js';
 import * as paymentService from '../services/payment.service.js';
+import * as expenseService from '../services/expense.service.js';
 import { enqueuePaymentReceipt } from '../services/notification.service.js';
 import { createLoanSchema } from '../schemas/loan.schema.js';
 import { updateOrganizationSchema } from '../schemas/organization.schema.js';
@@ -63,9 +64,10 @@ const postLogin = asyncHandler(async (req, res) => {
     return req.session.save(() => res.redirect('/admin/login'));
   }
 
-  // Solo ADMIN y SUPER_ADMIN pueden acceder al panel
-  if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-    req.session.flashError = 'Acceso denegado. Solo administradores';
+  // ADMIN/SUPER_ADMIN acceden al panel completo; COLLECTOR solo al
+  // registro de gastos (ver restricción de rutas en admin.routes.js)
+  if (!['ADMIN', 'SUPER_ADMIN', 'COLLECTOR'].includes(user.role)) {
+    req.session.flashError = 'Acceso denegado';
     return req.session.save(() => res.redirect('/admin/login'));
   }
 
@@ -73,7 +75,8 @@ const postLogin = asyncHandler(async (req, res) => {
   const { passwordHash: _omit, ...sessionUser } = user;
   req.session.user = sessionUser;
 
-  return req.session.save(() => res.redirect('/admin/dashboard'));
+  const redirectTo = user.role === 'COLLECTOR' ? '/admin/expenses' : '/admin/dashboard';
+  return req.session.save(() => res.redirect(redirectTo));
 });
 
 /**
@@ -105,7 +108,8 @@ const logout = asyncHandler((req, res, next) => {
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-const redirectToDashboard = (req, res) => res.redirect('/admin/dashboard');
+const redirectToDashboard = (req, res) =>
+  res.redirect(req.user.role === 'COLLECTOR' ? '/admin/expenses' : '/admin/dashboard');
 
 /**
  * GET /admin/dashboard
@@ -736,6 +740,130 @@ const createPayment = asyncHandler(async (req, res) => {
 });
 
 // ============================================
+// GASTOS OPERATIVOS (COBRADORES)
+// ============================================
+
+/**
+ * GET /admin/expenses
+ * Lista los gastos operativos. Un COLLECTOR solo ve los suyos;
+ * ADMIN/SUPER_ADMIN ven todos y pueden filtrar por cobrador.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
+const getExpenses = asyncHandler(async (req, res) => {
+  const { dateFrom, dateTo, category, page: pageParam } = req.query;
+  const { flashSucess, flashError } = req.session;
+  delete req.session.flashSucess;
+  delete req.session.flashError;
+
+  const isCollector = req.user.role === 'COLLECTOR';
+  // Un cobrador nunca puede ver los gastos de otro: se ignora cualquier
+  // collectorId que venga por query string y se fuerza al propio usuario.
+  const collectorId = isCollector ? req.user.id : req.query.collectorId;
+
+  const result = await expenseService.findExpenses(req.user.organizationId, {
+    collectorId: collectorId || undefined,
+    category,
+    dateFrom,
+    dateTo,
+    page: Number.parseInt(pageParam, 10) || 1,
+  });
+
+  return res.render('pages/expenses/index', {
+    title: 'Gastos',
+    user: req.user,
+    currentPath: '/admin/expenses',
+    isCollector,
+    expenses: result.expenses,
+    collectors: result.collectors,
+    total: result.total,
+    totalAmount: result.totalAmount,
+    page: result.page,
+    totalPages: result.totalPages,
+    filters: {
+      dateFrom: dateFrom || '',
+      dateTo: dateTo || '',
+      category: category || '',
+      collectorId: collectorId || '',
+    },
+    flashSucess,
+    flashError,
+  });
+});
+
+/**
+ * GET /admin/expenses/new
+ * Renderiza el formulario para registrar un gasto.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
+const getNewExpense = asyncHandler(async (req, res) => {
+  const { flashError } = req.session;
+  delete req.session.flashError;
+
+  const isCollector = req.user.role === 'COLLECTOR';
+  const collectors = isCollector
+    ? []
+    : await collectorService.findCollectors(req.user.organizationId);
+
+  return res.render('pages/expenses/new', {
+    title: 'Registrar Gasto',
+    user: req.user,
+    currentPath: '/admin/expenses/new',
+    isCollector,
+    collectors,
+    flashError,
+  });
+});
+
+/**
+ * POST /admin/expenses
+ * Registra un gasto operativo. Un COLLECTOR siempre registra a su propio
+ * nombre; un ADMIN/SUPER_ADMIN debe indicar para qué cobrador es.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
+const createExpense = asyncHandler(async (req, res) => {
+  const { category, amount, description, expenseDate, collectorId } = req.body;
+  const isCollector = req.user.role === 'COLLECTOR';
+
+  if (!isCollector && !collectorId) {
+    req.session.flashError = 'Debes seleccionar para qué cobrador es el gasto';
+    return res.redirect('/admin/expenses/new');
+  }
+
+  await expenseService.createExpense(
+    req.user.organizationId,
+    isCollector ? req.user.id : collectorId,
+    { category, amount, description, expenseDate },
+  );
+
+  req.session.flashSucess = 'Gasto registrado exitosamente';
+  return res.redirect('/admin/expenses');
+});
+
+/**
+ * DELETE /admin/expenses/:id
+ * Elimina un gasto. Solo el propio cobrador que lo registró o un
+ * ADMIN/SUPER_ADMIN de la organización pueden hacerlo.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
+const deleteExpense = asyncHandler(async (req, res) => {
+  await expenseService.deleteExpense(req.params.id, req.user.organizationId, {
+    id: req.user.id,
+    role: req.user.role,
+  });
+
+  req.session.flashSucess = 'Gasto eliminado';
+  return res.redirect('/admin/expenses');
+});
+
+// ============================================
 // RUTAS DE COBRO
 // ============================================
 
@@ -1267,6 +1395,10 @@ export {
   getPayments,
   getNewPayment,
   createPayment,
+  getExpenses,
+  getNewExpense,
+  createExpense,
+  deleteExpense,
   getRoutes,
   getRouteDetail,
   getNewRoute,

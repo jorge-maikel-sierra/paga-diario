@@ -395,7 +395,7 @@ describe('postLogin', () => {
     expect(req.session.flashError).toBe('Cuenta desactivada. Contacte al administrador');
   });
 
-  it('redirige a /admin/login si el rol no es ADMIN o SUPER_ADMIN', async () => {
+  it('redirige a /admin/expenses cuando el rol es COLLECTOR', async () => {
     mockFindUnique.mockResolvedValue({
       id: 'u-1',
       isActive: true,
@@ -409,8 +409,26 @@ describe('postLogin', () => {
 
     await postLogin(req, res);
 
+    expect(res.redirect).toHaveBeenCalledWith('/admin/expenses');
+    expect(req.session.flashError).toBeUndefined();
+  });
+
+  it('redirige a /admin/login si el rol no es ADMIN, SUPER_ADMIN ni COLLECTOR', async () => {
+    mockFindUnique.mockResolvedValue({
+      id: 'u-1',
+      isActive: true,
+      role: 'BOGUS_ROLE',
+      passwordHash: '$hash',
+    });
+    mockBcryptCompare.mockResolvedValue(true);
+
+    const req = createLoginReq();
+    const res = createRes();
+
+    await postLogin(req, res);
+
     expect(res.redirect).toHaveBeenCalledWith('/admin/login');
-    expect(req.session.flashError).toBe('Acceso denegado. Solo administradores');
+    expect(req.session.flashError).toBe('Acceso denegado');
   });
 
   it('no incluye passwordHash en la sesión', async () => {

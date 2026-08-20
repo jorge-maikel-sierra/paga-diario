@@ -25,6 +25,7 @@ import usersRouter from './admin.users.routes.js';
 import organizationsRouter from './admin.organizations.routes.js';
 import adminApiRouter from './admin.api.routes.js';
 import importsRouter from './admin.imports.routes.js';
+import expensesRouter from './admin.expenses.routes.js';
 
 // ============================================
 // Admin Router — Pago Ya
@@ -44,14 +45,27 @@ router.get('/login', getLogin);
 router.post('/login', postLogin);
 
 // ============================================
-// RUTAS PROTEGIDAS (sesión + rol ADMIN o SUPER_ADMIN)
-// Todos los sub-routers heredan este middleware al ser montados aquí.
+// RUTAS PROTEGIDAS (requieren sesión iniciada)
+// A partir de acá todo usuario autenticado (incluido COLLECTOR) pasa,
+// pero cada recurso decide su propio gate de rol más abajo.
 // ============================================
 
 router.use(verifySession);
+
+// --- Raíz: redirige según rol (COLLECTOR -> gastos, resto -> dashboard) ---
+router.get('/', redirectToDashboard);
+
+// --- Gastos operativos: único recurso accesible también para COLLECTOR ---
+router.use('/expenses', authorize('SUPER_ADMIN', 'ADMIN', 'COLLECTOR'), expensesRouter);
+
+// --- Logout: cualquier usuario autenticado puede cerrar su sesión ---
+router.post('/logout', logout);
+
+// ============================================
+// A partir de aquí, solo ADMIN o SUPER_ADMIN
+// ============================================
 router.use(authorize('SUPER_ADMIN', 'ADMIN'));
 
-router.get('/', redirectToDashboard);
 router.get('/dashboard', getDashboard);
 
 // --- Recursos del panel (cada uno con su Router propio) ---
@@ -75,9 +89,6 @@ router.get('/routes/:id', getRouteDetail);
 
 // --- Configuración ---
 router.get('/settings', getSettings);
-
-// --- Logout --- (POST para compatibilidad con formularios HTML)
-router.post('/logout', logout);
 
 // --- Recursos exclusivos SUPER_ADMIN ---
 router.use('/users', usersRouter);

@@ -1,0 +1,140 @@
+<%
+/**
+ * Vista: expenses/new.ejs
+ * Formulario para registrar un gasto operativo (combustible, reparación, comida).
+ *
+ * Variables locales esperadas:
+ * - isCollector: boolean — true si el usuario autenticado es COLLECTOR
+ * - collectors:  Array de cobradores activos (vacío cuando isCollector = true)
+ * - user:        Usuario autenticado (sesión)
+ * - flashError:  Mensaje flash de error (opcional)
+ */
+
+function todayISO() {
+  const now = new Date();
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+const CATEGORIES = [
+  { value: 'FUEL', emoji: '⛽', label: 'Combustible' },
+  { value: 'VEHICLE_REPAIR', emoji: '🔧', label: 'Reparación de moto' },
+  { value: 'FOOD', emoji: '🍽️', label: 'Almuerzo / Comida' },
+  { value: 'OTHER', emoji: '📋', label: 'Otro' },
+];
+%>
+<%- include('../../layouts/header') %>
+
+<div class="p-4 sm:p-6 lg:p-8 space-y-6">
+
+  <!-- =========================================
+       ENCABEZADO
+  ========================================= -->
+  <div class="page-header">
+    <a href="/admin/expenses" class="btn-back">←</a>
+    <div>
+      <h1 class="page-title">Registrar Gasto</h1>
+      <p class="page-subtitle">Combustible, reparaciones de moto o comida durante la jornada</p>
+    </div>
+  </div>
+
+  <!-- Los mensajes flash los renderiza header.ejs → partials/_flash -->
+
+  <form method="POST" action="/admin/expenses" class="max-w-xl form-card space-y-6">
+
+    <!-- Categoría -->
+    <div class="form-group">
+      <label class="form-label">Tipo de gasto <span class="text-red-500">*</span></label>
+      <div class="grid grid-cols-2 gap-3">
+        <% CATEGORIES.forEach(function(cat, i) { %>
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-line cursor-pointer
+                         hover:bg-surface-hover transition-colors has-[:checked]:border-brand-green has-[:checked]:bg-brand-green/10">
+            <input type="radio" name="category" value="<%= cat.value %>" required <%= i === 0 ? 'checked' : '' %>
+                   class="accent-brand-green" />
+            <span class="text-sm text-ink"><%= cat.emoji %> <%= cat.label %></span>
+          </label>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- Fila: Monto · Fecha -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+
+      <!-- Monto -->
+      <div class="form-group">
+        <label for="amount" class="form-label">Monto <span class="text-red-500">*</span></label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted text-sm">$</span>
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            required
+            min="1"
+            step="1"
+            placeholder="0"
+            class="form-input pl-8 tabular-nums"
+          />
+        </div>
+      </div>
+
+      <!-- Fecha del gasto -->
+      <div class="form-group">
+        <label for="expenseDate" class="form-label">Fecha <span class="text-red-500">*</span></label>
+        <input
+          type="date"
+          id="expenseDate"
+          name="expenseDate"
+          required
+          value="<%= todayISO() %>"
+          class="form-input"
+        />
+      </div>
+
+    </div>
+
+    <!-- Cobrador (solo visible para ADMIN/SUPER_ADMIN) -->
+    <% if (!isCollector) { %>
+      <div class="form-group">
+        <label for="collectorId" class="form-label">Cobrador <span class="text-red-500">*</span></label>
+        <select id="collectorId" name="collectorId" required class="form-select">
+          <option value="">— Selecciona un cobrador —</option>
+          <% collectors.forEach(function(collector) { %>
+            <option value="<%= collector.id %>">
+              <%= collector.firstName %> <%= collector.lastName %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    <% } %>
+
+    <!-- Descripción -->
+    <div class="form-group">
+      <label for="description" class="form-label">Descripción (opcional)</label>
+      <textarea
+        id="description"
+        name="description"
+        rows="2"
+        placeholder="Ej: Cambio de llanta trasera, tanqueo en estación Terpel..."
+        class="form-textarea"
+      ></textarea>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-line-subtle">
+      <button type="submit" class="flex-1 btn-primary justify-center">
+        💾 Registrar Gasto
+      </button>
+      <a href="/admin/expenses" class="flex-1 btn-secondary justify-center">
+        Cancelar
+      </a>
+    </div>
+
+  </form>
+
+</div>
+
+<%- include('../../layouts/footer') %>

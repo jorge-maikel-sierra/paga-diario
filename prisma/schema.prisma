@@ -60,6 +60,13 @@ enum ImportBatchStatus {
   FAILED
 }
 
+enum ExpenseCategory {
+  FUEL
+  VEHICLE_REPAIR
+  FOOD
+  OTHER
+}
+
 enum ImportRowStatus {
   VALID
   INVALID
@@ -99,6 +106,7 @@ model Organization {
   loans         Loan[]
   clients       Client[]
   importBatches ImportBatch[]
+  expenses      Expense[]
 
   @@map("organizations")
 }
@@ -125,6 +133,7 @@ model User {
   incidents     Incident[]
   gpsLocations  GpsLocation[]
   importBatches ImportBatch[]
+  expenses      Expense[]
 
   @@index([organizationId])
   @@index([email])
@@ -329,6 +338,27 @@ model Incident {
   @@index([collectorId])
   @@index([reportedAt])
   @@map("incidents")
+}
+
+/// Gasto operativo registrado por un cobrador durante su jornada (combustible, reparaciones, comida)
+model Expense {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @map("organization_id") @db.Uuid
+  collectorId    String          @map("collector_id") @db.Uuid
+  category       ExpenseCategory
+  amount         Decimal         @db.Decimal(14, 2)
+  description    String?         @db.Text
+  expenseDate    DateTime        @map("expense_date") @db.Date
+  photoUrl       String?         @map("photo_url") @db.VarChar(500)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  collector    User         @relation(fields: [collectorId], references: [id])
+
+  @@index([organizationId, expenseDate])
+  @@index([collectorId, expenseDate])
+  @@map("expenses")
 }
 
 /// Ubicación GPS del cobrador durante la jornada

@@ -25,6 +25,10 @@ const mockDeleteCollector = jest.fn((req, res) => res.status(200).end());
 const mockGetPayments = jest.fn((req, res) => res.status(200).end());
 const mockGetNewPayment = jest.fn((req, res) => res.status(200).end());
 const mockCreatePayment = jest.fn((req, res) => res.status(200).end());
+const mockGetExpenses = jest.fn((req, res) => res.status(200).end());
+const mockGetNewExpense = jest.fn((req, res) => res.status(200).end());
+const mockCreateExpense = jest.fn((req, res) => res.status(200).end());
+const mockDeleteExpense = jest.fn((req, res) => res.status(200).end());
 const mockGetRoutes = jest.fn((req, res) => res.status(200).end());
 const mockGetNewRoute = jest.fn((req, res) => res.status(200).end());
 const mockCreateRoute = jest.fn((req, res) => res.status(200).end());
@@ -72,6 +76,10 @@ jest.unstable_mockModule('../../src/controllers/admin.controller.js', () => ({
   getPayments: mockGetPayments,
   getNewPayment: mockGetNewPayment,
   createPayment: mockCreatePayment,
+  getExpenses: mockGetExpenses,
+  getNewExpense: mockGetNewExpense,
+  createExpense: mockCreateExpense,
+  deleteExpense: mockDeleteExpense,
   getRoutes: mockGetRoutes,
   getNewRoute: mockGetNewRoute,
   createRoute: mockCreateRoute,
@@ -393,6 +401,47 @@ describe('admin.routes', () => {
       await request(app).get('/admin/payments').set('x-test-session', adminSession).expect(200);
 
       expect(mockGetPayments).toHaveBeenCalled();
+    });
+  });
+
+  describe('expense routes', () => {
+    const collectorSession = JSON.stringify({
+      user: {
+        id: 'user-002',
+        role: 'COLLECTOR',
+        organizationId: 'org-001',
+        firstName: 'Cobrador',
+        lastName: 'Test',
+      },
+    });
+
+    it('GET /admin/expenses calls getExpenses for ADMIN', async () => {
+      await request(app).get('/admin/expenses').set('x-test-session', adminSession).expect(200);
+
+      expect(mockGetExpenses).toHaveBeenCalled();
+    });
+
+    it('GET /admin/expenses calls getExpenses for COLLECTOR', async () => {
+      await request(app).get('/admin/expenses').set('x-test-session', collectorSession).expect(200);
+
+      expect(mockGetExpenses).toHaveBeenCalled();
+    });
+
+    it('POST /admin/expenses calls createExpense for COLLECTOR', async () => {
+      await request(app)
+        .post('/admin/expenses')
+        .set('x-test-session', collectorSession)
+        .send({ category: 'FUEL', amount: 20000, expenseDate: '2026-01-01' })
+        .expect(200);
+
+      expect(mockCreateExpense).toHaveBeenCalled();
+    });
+
+    it('COLLECTOR is still blocked from /admin/payments', async () => {
+      const res = await request(app).get('/admin/payments').set('x-test-session', collectorSession);
+
+      expect(res.status).toBe(403);
+      expect(mockGetPayments).not.toHaveBeenCalled();
     });
   });
 
