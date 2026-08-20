@@ -2,6 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================
+   TOKENS DE TEMA (claro / oscuro)
+   RGB sin función rgb() para soportar el patrón
+   rgb(var(--x) / <alpha-value>) de Tailwind (permite
+   usar bg-app/50, text-brand/10, etc. con opacidad).
+===================================================== */
+@layer base {
+  :root {
+    --color-app: 248 249 251;
+    --color-surface: 255 255 255;
+    --color-surface-hover: 244 245 247;
+    --color-sidebar: 255 255 255;
+    --color-border: 226 232 240;
+    --color-border-subtle: 237 241 245;
+    --color-text-primary: 10 22 40;
+    --color-text-secondary: 100 116 139;
+    --color-text-muted: 148 163 184;
+    --color-brand: 0 197 102;
+    --color-brand-strong: 0 163 84;
+    --color-action: 10 22 40;
+    --color-action-hover: 22 40 66;
+    --color-on-action: 255 255 255;
+    --color-success: 22 163 74;
+    --color-warning: 217 119 6;
+    --color-danger: 220 38 38;
+    --color-info: 37 99 235;
+  }
+
+  .dark {
+    --color-app: 10 13 18;
+    --color-surface: 17 21 29;
+    --color-surface-hover: 26 31 42;
+    --color-sidebar: 10 13 18;
+    --color-border: 35 41 54;
+    --color-border-subtle: 27 33 44;
+    --color-text-primary: 241 245 249;
+    --color-text-secondary: 148 163 184;
+    --color-text-muted: 100 116 139;
+    --color-brand: 25 211 122;
+    --color-brand-strong: 52 224 142;
+    --color-action: 0 197 102;
+    --color-action-hover: 25 211 122;
+    --color-on-action: 10 22 40;
+    --color-success: 34 197 94;
+    --color-warning: 245 158 11;
+    --color-danger: 239 68 68;
+    --color-info: 59 130 246;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  /* Números tabulares para cifras monetarias: los dígitos ocupan el
+     mismo ancho, así las columnas de montos quedan alineadas. */
+  .tabular-nums,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Sidebar colapsado a modo ícono (solo escritorio, ver sidebar.js).
+     La clase vive en <html> para poder aplicarse antes del primer
+     pintado y evitar el parpadeo del sidebar expandido. */
+  @media (min-width: 1024px) {
+    html.sidebar-collapsed #sidebar {
+      width: 4.5rem;
+    }
+    html.sidebar-collapsed .sidebar-label {
+      display: none;
+    }
+  }
+}
+
+@layer utilities {
+  /* =====================================================
+     SCROLL-REVEAL (landing) — landing.js observa [data-reveal]
+     con IntersectionObserver y agrega .is-visible al entrar en
+     viewport. Empieza oculto/desplazado y se anima al aparecer.
+  ===================================================== */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Retraso escalonado para elementos hijos de un grupo (grillas de cards) */
+  [data-reveal-group] > *:nth-child(1) { transition-delay: 0ms; }
+  [data-reveal-group] > *:nth-child(2) { transition-delay: 80ms; }
+  [data-reveal-group] > *:nth-child(3) { transition-delay: 160ms; }
+  [data-reveal-group] > *:nth-child(4) { transition-delay: 240ms; }
+  [data-reveal-group] > *:nth-child(5) { transition-delay: 320ms; }
+  [data-reveal-group] > *:nth-child(6) { transition-delay: 400ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .animate-blob,
+    .animate-float {
+      animation: none;
+    }
+  }
+
+  /* Nav de la landing: transparente arriba de todo, se vuelve sólido
+     con blur apenas se hace scroll (ver landing.js → .is-scrolled). */
+  #landing-nav {
+    background-color: transparent;
+    border-bottom: 1px solid transparent;
+  }
+
+  #landing-nav.is-scrolled {
+    @apply bg-app/80 border-line-subtle;
+    backdrop-filter: blur(12px);
+  }
+}
+
 @layer components {
 
   /* =====================================================
@@ -23,7 +150,7 @@
    * Tamaño y peso consistente en todos los formularios.
    */
   .form-label {
-    @apply block text-sm font-medium text-gray-700;
+    @apply block text-sm font-medium text-ink;
   }
 
   /**
@@ -31,10 +158,10 @@
    * Padding, border, radius y foco unificados.
    */
   .form-input {
-    @apply w-full px-4 py-3 rounded-lg border border-gray-300
-           text-sm text-gray-700 bg-white
-           placeholder-gray-400
-           focus:ring-2 focus:ring-brand-green focus:border-brand-green
+    @apply w-full px-4 py-3 rounded-lg border border-line
+           text-sm text-ink bg-surface
+           placeholder-ink-muted
+           focus:ring-2 focus:ring-brand focus:border-brand
            focus:outline-none transition;
   }
 
@@ -61,14 +188,14 @@
    * Texto de ayuda debajo del campo (hint).
    */
   .form-hint {
-    @apply text-xs text-gray-400 mt-0.5;
+    @apply text-xs text-ink-muted mt-0.5;
   }
 
   /**
    * Mensaje de error inline de un campo.
    */
   .form-error-msg {
-    @apply text-xs text-red-600 mt-0.5;
+    @apply text-xs text-danger mt-0.5;
   }
 
   /**
@@ -80,7 +207,7 @@
   }
 
   .form-section-title {
-    @apply text-lg font-semibold text-brand-navy mb-4 pb-2 border-b border-gray-100;
+    @apply text-lg font-display font-semibold text-ink mb-4 pb-2 border-b border-line-subtle;
   }
 
   /**
@@ -88,7 +215,16 @@
    * Reemplaza: bg-white rounded-xl border border-gray-200 shadow-sm p-6
    */
   .form-card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm p-6;
+    @apply bg-surface rounded-xl border border-line shadow-sm p-6;
+  }
+
+  /**
+   * Tarjeta genérica — contenedor base reutilizado en dashboards,
+   * listados y paneles. Equivale a .form-card pero sin semántica
+   * de formulario (nombre más claro cuando envuelve otro contenido).
+   */
+  .card {
+    @apply bg-surface rounded-xl border border-line shadow-sm;
   }
 
   /* =====================================================
@@ -98,16 +234,16 @@
   ===================================================== */
 
   /**
-   * Botón principal — acción primaria del formulario.
-   * Fondo verde sólido con hover más oscuro para mantener contraste
-   * legible del texto blanco en todos los estados.
+   * Botón principal — acción primaria de la página.
+   * Usa el token `action`, que es tinta/navy en modo claro y
+   * verde de marca en modo oscuro (el navy se hunde en fondos oscuros).
    */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-lg
-           bg-brand-green text-white text-sm font-semibold
-           shadow-sm hover:bg-[#00a855] active:bg-[#008f47]
-           focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2
+           bg-action text-action-on text-sm font-semibold
+           shadow-sm hover:bg-action-hover
+           focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-app
            transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
@@ -120,9 +256,9 @@
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-lg
-           border-2 border-brand-green text-brand-green text-sm font-semibold
-           bg-white hover:bg-brand-green hover:text-white
-           focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2
+           border-2 border-brand text-brand text-sm font-semibold
+           bg-surface hover:bg-brand hover:text-white
+           focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-app
            transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
@@ -133,8 +269,8 @@
   .btn-back {
     @apply inline-flex items-center justify-center
            w-10 h-10 rounded-lg
-           border border-gray-300 text-gray-500
-           hover:bg-gray-50 transition-colors;
+           border border-line text-ink-secondary
+           hover:bg-surface-hover transition-colors;
   }
 
   /* =====================================================
@@ -149,20 +285,25 @@
   }
 
   .page-title {
-    @apply text-2xl font-bold text-brand-navy;
+    @apply text-2xl font-display font-bold text-ink;
   }
 
   .page-subtitle {
-    @apply text-sm text-gray-500 mt-1;
+    @apply text-sm text-ink-secondary mt-1;
   }
 
   /* =====================================================
-     MENSAJES FLASH
-     Reutilizable en cualquier vista que muestre alertas.
+     MENSAJES FLASH — estilo banner: icono + título + texto,
+     con botón opcional. Un solo patrón para success/warning/error.
   ===================================================== */
 
+  .flash-banner {
+    @apply flex flex-col sm:flex-row sm:items-center gap-4
+           rounded-xl border p-5;
+  }
+
   .flash-error {
-    @apply rounded-lg bg-red-50 border border-red-200 p-4;
+    @apply flash-banner bg-danger/10 border-danger/20;
   }
 
   .flash-error-content {
@@ -170,15 +311,23 @@
   }
 
   .flash-error-text {
-    @apply text-sm font-medium text-red-800;
+    @apply text-sm font-medium text-danger;
   }
 
   .flash-success {
-    @apply rounded-lg bg-green-50 border border-green-200 p-4;
+    @apply flash-banner bg-success/10 border-success/20;
   }
 
   .flash-success-text {
-    @apply text-sm font-medium text-green-800;
+    @apply text-sm font-medium text-success;
+  }
+
+  .flash-warning {
+    @apply flash-banner bg-warning/10 border-warning/20;
+  }
+
+  .flash-warning-text {
+    @apply text-sm font-medium text-warning;
   }
 
   /* =====================================================
@@ -193,7 +342,7 @@
   }
 
   .table-base thead {
-    @apply bg-gray-50 text-xs text-gray-500 uppercase tracking-wider;
+    @apply bg-app text-xs text-ink-secondary uppercase tracking-wider;
   }
 
   .table-base thead th {
@@ -201,81 +350,40 @@
   }
 
   .table-base tbody tr {
-    @apply border-t border-gray-100 hover:bg-gray-50 transition-colors;
+    @apply border-t border-line-subtle hover:bg-surface-hover transition-colors;
   }
 
   .table-base tbody td {
-    @apply px-4 py-3 text-gray-700;
+    @apply px-4 py-3 text-ink;
   }
 
   /* =====================================================
-     VARIANTES DARK — vista de Super Admin (organizations)
-     Fondo brand-navy, texto blanco, bordes gris-oscuro.
+     INSIGNIAS (badges) de estado — pastilla con fondo tenue
+     y texto del mismo color, legible en ambos temas.
   ===================================================== */
 
-  /**
-   * Input sobre fondo oscuro (bg-brand-navy).
-   * Usa border-gray-700 como proxy de brand-border (no registrado en theme).
-   */
-  .form-input-dark {
-    @apply w-full px-4 py-3 rounded-lg border border-gray-700
-           text-white text-sm bg-brand-navy
-           placeholder-gray-500
-           focus:ring-2 focus:ring-brand-green focus:border-brand-green
-           focus:outline-none transition;
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /**
-   * Select oscuro — extiende .form-input-dark con flecha gris clara.
-   */
-  .form-select-dark {
-    @apply form-input-dark appearance-none pr-10;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.8rem center;
-    background-size: 0.9rem;
+  .badge-success {
+    @apply badge bg-success/10 text-success;
   }
 
-  /**
-   * Etiqueta oscura — texto gris claro sobre fondo navy.
-   */
-  .form-label-dark {
-    @apply block text-sm font-medium text-gray-300;
+  .badge-warning {
+    @apply badge bg-warning/10 text-warning;
   }
 
-  /**
-   * Hint oscuro.
-   */
-  .form-hint-dark {
-    @apply text-xs text-gray-500 mt-0.5;
+  .badge-danger {
+    @apply badge bg-danger/10 text-danger;
   }
 
-  /**
-   * Título de sección sobre fondo oscuro.
-   */
-  .form-section-title-dark {
-    @apply text-lg font-semibold text-white mb-4 pb-2 border-b border-gray-700;
+  .badge-info {
+    @apply badge bg-info/10 text-info;
   }
 
-  /**
-   * Contenedor del formulario oscuro (Super Admin).
-   * bg-[#0f1e35] = brand-surface approximation.
-   */
-  .form-card-dark {
-    @apply border border-gray-700 rounded-xl shadow-lg p-6;
-    background-color: #0f1e35;
-  }
-
-  /**
-   * Botón secundario oscuro — cancelar en vistas Super Admin.
-   */
-  .btn-secondary-dark {
-    @apply inline-flex items-center justify-center gap-2
-           px-6 py-3 rounded-lg
-           border border-gray-700 text-gray-400 text-sm font-medium
-           hover:bg-brand-navy focus:outline-none
-           focus:ring-2 focus:ring-brand-green focus:ring-offset-2
-           transition-colors;
+  .badge-neutral {
+    @apply badge bg-ink/5 text-ink-secondary;
   }
 
   /* =====================================================
@@ -283,10 +391,32 @@
      en vistas que todavía no han sido migradas.
   ===================================================== */
   .select-control {
-    @apply appearance-none bg-white pr-10;
+    @apply appearance-none bg-surface pr-10;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.8rem center;
     background-size: 0.9rem;
+  }
+
+  /* =====================================================
+     MAPA (Leaflet) — el popup y los controles son elementos
+     propios de la librería, no clases Tailwind; los alineamos
+     a los tokens de tema a mano para que respeten modo oscuro.
+  ===================================================== */
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    @apply bg-surface text-ink;
+  }
+
+  .leaflet-control-zoom a {
+    @apply bg-surface text-ink border-line;
+  }
+
+  .leaflet-control-zoom a:hover {
+    @apply bg-surface-hover;
+  }
+
+  .leaflet-control-attribution {
+    @apply bg-surface/80 text-ink-muted;
   }
 }

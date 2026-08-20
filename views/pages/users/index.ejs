@@ -36,7 +36,7 @@ function roleBadge(role) {
     ADMIN:       { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Administrador' },
     COLLECTOR:   { bg: 'bg-green-100',  text: 'text-green-700',  label: 'Cobrador' },
   };
-  return map[role] || { bg: 'bg-gray-100', text: 'text-gray-600', label: role };
+  return map[role] || { bg: 'bg-surface-hover', text: 'text-ink-secondary', label: role };
 }
 %>
 <%- include('../../layouts/header') %>
@@ -50,9 +50,9 @@ function roleBadge(role) {
   ========================================= -->
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Gestión de Usuarios</h1>
-      <p class="text-sm text-gray-500 mt-1">
-        <span class="font-medium text-brand-navy"><%= users.length %></span>
+      <h1 class="text-2xl font-bold text-ink">Gestión de Usuarios</h1>
+      <p class="text-sm text-ink-secondary mt-1">
+        <span class="font-medium text-ink"><%= users.length %></span>
         usuario<%= users.length !== 1 ? 's' : '' %> en tu organización
       </p>
     </div>
@@ -65,20 +65,20 @@ function roleBadge(role) {
           name="search"
           value="<%= search %>"
           placeholder="Buscar por nombre o email..."
-          class="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-gray-300
-                 text-sm text-gray-700 placeholder-gray-400
+          class="w-full sm:w-64 px-4 py-2.5 rounded-lg border border-line
+                 text-sm text-ink placeholder-gray-400
                  focus:ring-2 focus:ring-brand-green focus:border-brand-green focus:outline-none
                  transition"
         />
         <button type="submit"
-                class="px-4 py-2.5 rounded-lg bg-brand-navy text-white text-sm font-semibold
+                class="px-4 py-2.5 rounded-lg bg-action text-action-on text-sm font-semibold
                        hover:bg-blue-900 transition">
           🔍
         </button>
         <% if (search) { %>
           <a href="/admin/users"
-             class="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-500 text-sm
-                    hover:bg-gray-50 transition flex items-center">
+             class="px-4 py-2.5 rounded-lg border border-line text-ink-secondary text-sm
+                    hover:bg-surface-hover transition flex items-center">
             ✕
           </a>
         <% } %>
@@ -97,13 +97,13 @@ function roleBadge(role) {
   <!-- =========================================
        TABLA DE USUARIOS
   ========================================= -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+  <div class="bg-surface rounded-xl border border-line shadow-sm overflow-hidden">
 
     <% if (users.length === 0) { %>
       <!-- Estado vacío -->
       <div class="py-16 text-center">
         <span class="text-5xl block mb-4">👤</span>
-        <p class="text-base font-medium text-gray-500">
+        <p class="text-base font-medium text-ink-secondary">
           <% if (search) { %>
             No se encontraron usuarios para "<%= search %>"
           <% } else { %>
@@ -121,36 +121,36 @@ function roleBadge(role) {
 
       <!-- Tabla responsiva -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-line text-sm">
+          <thead class="bg-app">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Nombre
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Email
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Teléfono
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Rol
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Estado
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Último Acceso
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-line-subtle">
             <% users.forEach(function(u) { %>
               <% const badge = roleBadge(u.role); %>
-              <tr class="hover:bg-gray-50 transition-colors">
+              <tr class="hover:bg-surface-hover transition-colors">
 
                 <!-- Nombre -->
                 <td class="px-4 py-4">
@@ -160,19 +160,19 @@ function roleBadge(role) {
                         <%= u.firstName.charAt(0) %><%= u.lastName.charAt(0) %>
                       </span>
                     </div>
-                    <span class="font-medium text-brand-navy">
+                    <span class="font-medium text-ink">
                       <%= u.firstName %> <%= u.lastName %>
                     </span>
                   </div>
                 </td>
 
                 <!-- Email -->
-                <td class="px-4 py-4 text-gray-600">
+                <td class="px-4 py-4 text-ink-secondary">
                   <%= u.email %>
                 </td>
 
                 <!-- Teléfono -->
-                <td class="px-4 py-4 text-gray-600">
+                <td class="px-4 py-4 text-ink-secondary">
                   <%= u.phone || '—' %>
                 </td>
 
@@ -200,7 +200,7 @@ function roleBadge(role) {
                 </td>
 
                 <!-- Último Acceso -->
-                <td class="px-4 py-4 text-center text-gray-500 text-xs">
+                <td class="px-4 py-4 text-center text-ink-secondary text-xs">
                   <%= u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Nunca' %>
                 </td>
 

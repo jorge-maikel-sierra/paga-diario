@@ -9,7 +9,7 @@
     ACTIVE:    { text: 'Activo',     css: 'bg-green-100  text-green-700'  },
     COMPLETED: { text: 'Completado', css: 'bg-blue-100   text-blue-700'   },
     DEFAULTED: { text: 'Moroso',     css: 'bg-red-100    text-red-700'    },
-    CANCELLED: { text: 'Cancelado',  css: 'bg-gray-100   text-gray-600'   },
+    CANCELLED: { text: 'Cancelado',  css: 'bg-surface-hover   text-ink-secondary'   },
   };
 
   const incidentLabel = {
@@ -32,19 +32,19 @@
 <div class="p-4 sm:p-6 lg:p-8 space-y-8">
 
   <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-sm text-gray-500">
+  <nav class="flex items-center gap-2 text-sm text-ink-secondary">
     <a href="/admin/clients" class="hover:text-brand-green transition-colors">Clientes</a>
     <span>›</span>
-    <span class="text-gray-700 font-medium"><%= client.firstName %> <%= client.lastName %></span>
+    <span class="text-ink font-medium"><%= client.firstName %> <%= client.lastName %></span>
   </nav>
 
   <!-- Perfil del cliente -->
-  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+  <div class="bg-surface rounded-xl border border-line shadow-sm p-6">
     <div class="flex flex-col sm:flex-row gap-6">
 
       <!-- Avatar -->
       <div class="flex-shrink-0">
-        <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-4xl border-2
+        <div class="w-24 h-24 rounded-full bg-surface-hover flex items-center justify-center text-4xl border-2
           <%= client.isActive ? 'border-green-300' : 'border-red-300' %>">
           👤
         </div>
@@ -60,41 +60,41 @@
       <!-- Datos principales -->
       <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nombre completo</p>
-          <p class="text-base font-bold text-brand-navy dark:text-white mt-0.5">
+          <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Nombre completo</p>
+          <p class="text-base font-bold text-ink mt-0.5">
             <%= client.firstName %> <%= client.lastName %>
           </p>
         </div>
         <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Documento</p>
-          <p class="text-base text-gray-700 dark:text-gray-200 mt-0.5">
+          <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Documento</p>
+          <p class="text-base text-ink mt-0.5">
             <%= client.documentType %> <%= client.documentNumber %>
           </p>
         </div>
         <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Teléfono</p>
-          <p class="text-base text-gray-700 dark:text-gray-200 mt-0.5"><%= client.phone || '—' %></p>
+          <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Teléfono</p>
+          <p class="text-base text-ink mt-0.5"><%= client.phone || '—' %></p>
         </div>
         <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dirección</p>
-          <p class="text-base text-gray-700 dark:text-gray-200 mt-0.5"><%= client.address || '—' %></p>
+          <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Dirección</p>
+          <p class="text-base text-ink mt-0.5"><%= client.address || '—' %></p>
         </div>
         <!-- businessName and businessAddress removed from view -->
         <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Registrado</p>
-          <p class="text-base text-gray-700 dark:text-gray-200 mt-0.5"><%= formatDate(client.createdAt) %></p>
+          <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Registrado</p>
+          <p class="text-base text-ink mt-0.5"><%= formatDate(client.createdAt) %></p>
         </div>
         <% if (client.notes) { %>
           <div class="sm:col-span-2 lg:col-span-3">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Notas</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mt-0.5"><%= client.notes %></p>
+            <p class="text-xs font-semibold text-ink-secondary uppercase tracking-wide">Notas</p>
+            <p class="text-sm text-ink-secondary mt-0.5"><%= client.notes %></p>
           </div>
         <% } %>
       </div>
     </div>
 
     <!-- Acciones -->
-    <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-3">
+    <div class="mt-6 pt-6 border-t border-line-subtle flex flex-wrap gap-3">
       <% if (client.isActive) { %>
         <form action="/admin/clients/<%= client.id %>/status?_method=PATCH" method="POST"
           onsubmit="return confirm('¿Seguro que deseas restringir a este cliente?')">
@@ -119,51 +119,51 @@
 
   <!-- Historial de préstamos -->
   <div>
-    <h2 class="text-lg font-semibold text-brand-navy dark:text-white mb-4">
+    <h2 class="text-lg font-semibold text-ink mb-4">
       💳 Préstamos
-      <span class="ml-2 text-sm font-normal text-gray-500">(<%= loans.length %>)</span>
+      <span class="ml-2 text-sm font-normal text-ink-secondary">(<%= loans.length %>)</span>
     </h2>
-    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto">
+    <div class="bg-surface rounded-xl border border-line shadow-sm overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead class="bg-gray-50 dark:bg-gray-800">
+        <thead class="bg-app">
           <tr>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Capital</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Total</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Pagado</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Saldo</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Cuotas</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Estado</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Desembolso</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Cobrador</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Capital</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Total</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Pagado</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Saldo</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Cuotas</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Estado</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Desembolso</th>
+            <th class="px-4 py-3 text-left font-semibold text-ink">Cobrador</th>
           </tr>
         </thead>
         <tbody>
           <% if (loans.length === 0) { %>
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-gray-400">Sin préstamos registrados.</td>
+              <td colspan="8" class="px-4 py-8 text-center text-ink-muted">Sin préstamos registrados.</td>
             </tr>
           <% } else { %>
             <% loans.forEach(function(loan) { %>
-              <tr class="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <td class="px-4 py-3 font-medium text-brand-navy dark:text-white">
+              <tr class="border-t border-line-subtle hover:bg-surface-hover transition-colors">
+                <td class="px-4 py-3 font-medium text-ink">
                   <%= formatCOP(loan.principalAmount) %>
                 </td>
                 <td class="px-4 py-3"><%= formatCOP(loan.totalAmount) %></td>
                 <td class="px-4 py-3 text-brand-green"><%= formatCOP(loan.totalPaid) %></td>
                 <td class="px-4 py-3 text-yellow-600"><%= formatCOP(loan.outstandingBalance) %></td>
-                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                <td class="px-4 py-3 text-ink-secondary">
                   <%= loan.paidPayments %> / <%= loan.numberOfPayments %>
                 </td>
                 <td class="px-4 py-3">
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
-                               <%= (statusLabel[loan.status] || { css: 'bg-gray-100 text-gray-600' }).css %>">
+                               <%= (statusLabel[loan.status] || { css: 'bg-surface-hover text-ink-secondary' }).css %>">
                     <%= (statusLabel[loan.status] || { text: loan.status }).text %>
                   </span>
                 </td>
-                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                <td class="px-4 py-3 text-ink-secondary">
                   <%= formatDate(loan.disbursementDate) %>
                 </td>
-                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                <td class="px-4 py-3 text-ink-secondary">
                   <%= loan.collector.firstName %> <%= loan.collector.lastName %>
                 </td>
               </tr>
@@ -176,32 +176,32 @@
 
   <!-- Novedades / Incidentes -->
   <div>
-    <h2 class="text-lg font-semibold text-brand-navy dark:text-white mb-4">
+    <h2 class="text-lg font-semibold text-ink mb-4">
       📋 Novedades registradas
-      <span class="ml-2 text-sm font-normal text-gray-500">(<%= incidents.length %>)</span>
+      <span class="ml-2 text-sm font-normal text-ink-secondary">(<%= incidents.length %>)</span>
     </h2>
     <% if (incidents.length === 0) { %>
-      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-8 text-center text-gray-400">
+      <div class="bg-surface rounded-xl border border-line shadow-sm p-8 text-center text-ink-muted">
         Sin novedades registradas.
       </div>
     <% } else { %>
       <div class="space-y-3">
         <% incidents.forEach(function(incident) { %>
-          <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-5 py-4 flex items-start gap-4">
+          <div class="bg-surface rounded-xl border border-line shadow-sm px-5 py-4 flex items-start gap-4">
             <span class="text-2xl mt-0.5">
               <%= incidentIcons[incident.type] || '📌' %>
             </span>
             <div class="flex-1">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                <span class="text-sm font-semibold text-ink">
                   <%= incidentLabel[incident.type] || incident.type %>
                 </span>
-                <span class="text-xs text-gray-400"><%= formatDate(incident.reportedAt) %></span>
+                <span class="text-xs text-ink-muted"><%= formatDate(incident.reportedAt) %></span>
               </div>
               <% if (incident.description) { %>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1"><%= incident.description %></p>
+                <p class="text-sm text-ink-secondary mt-1"><%= incident.description %></p>
               <% } %>
-              <p class="text-xs text-gray-400 mt-1">
+              <p class="text-xs text-ink-muted mt-1">
                 Cobrador: <%= incident.collector.firstName %> <%= incident.collector.lastName %>
               </p>
             </div>

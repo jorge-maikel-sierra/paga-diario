@@ -3,14 +3,14 @@
 <div class="flex items-center justify-center min-h-[60vh] p-4 sm:p-6 lg:p-8">
   <div class="w-full max-w-lg text-center space-y-6">
 
-    <p class="text-7xl font-bold text-brand-navy"><%= statusCode %></p>
+    <p class="text-7xl font-bold text-ink"><%= statusCode %></p>
 
-    <h1 class="text-2xl font-semibold text-gray-900"><%= message %></h1>
+    <h1 class="text-2xl font-semibold text-ink"><%= message %></h1>
 
     <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
-      <ul class="text-left bg-red-50 border border-red-200 rounded-lg p-4 space-y-1">
+      <ul class="text-left bg-danger/10 border border-danger/20 rounded-lg p-4 space-y-1">
         <% errors.forEach((err) => { %>
-          <li class="text-sm text-red-700">
+          <li class="text-sm text-danger">
             <% if (err.field) { %>
               <span class="font-medium"><%= err.field %>:</span>
             <% } %>
@@ -22,7 +22,7 @@
 
     <% if (typeof stack !== 'undefined' && stack) { %>
       <details class="text-left">
-        <summary class="cursor-pointer text-sm text-gray-400 hover:text-gray-600">Stack trace</summary>
+        <summary class="cursor-pointer text-sm text-ink-muted hover:text-ink">Stack trace</summary>
         <pre class="mt-2 bg-gray-900 text-green-400 text-xs p-4 rounded-lg overflow-x-auto"><%= stack %></pre>
       </details>
     <% } %>

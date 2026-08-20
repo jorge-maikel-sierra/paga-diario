@@ -24,13 +24,13 @@ const DOCUMENT_OPTIONS = [
   ========================================= -->
   <div class="flex items-center gap-4">
     <a href="/admin/clients"
-       class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300
-              text-gray-500 hover:bg-gray-50 transition-colors">
+       class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line
+              text-ink-secondary hover:bg-surface-hover transition-colors">
       ←
     </a>
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Crear Nuevo Cliente</h1>
-      <p class="text-sm text-gray-500 mt-1">Registra un cliente en tu organización</p>
+      <h1 class="text-2xl font-bold text-ink">Crear Nuevo Cliente</h1>
+      <p class="text-sm text-ink-secondary mt-1">Registra un cliente en tu organización</p>
     </div>
   </div>
 
@@ -38,10 +38,10 @@ const DOCUMENT_OPTIONS = [
        MENSAJE DE ERROR
   ========================================= -->
   <% if (typeof flashError !== 'undefined' && flashError) { %>
-    <div class="rounded-lg bg-red-50 border border-red-200 p-4" role="alert">
+    <div class="flash-error" role="alert">
       <div class="flex items-center gap-2">
-        <span class="text-red-600 text-lg">❌</span>
-        <p class="text-sm font-medium text-red-800"><%= flashError %></p>
+        <span class="text-danger text-lg shrink-0">❌</span>
+        <p class="flash-error-text"><%= flashError %></p>
       </div>
     </div>
   <% } %>
@@ -218,7 +218,7 @@ const DOCUMENT_OPTIONS = [
     </div>
 
     <!-- Botones de Acción -->
-    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
+    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-line-subtle">
       <button type="submit" class="w-full sm:w-auto btn-primary">
         💾 Crear Cliente
       </button>

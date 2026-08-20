@@ -1,46 +1,144 @@
-<aside class="w-64 bg-brand-navy min-h-screen border-r border-gray-700 hidden lg:block">
-  <nav class="mt-6 px-3 space-y-1">
-    <% const menuItems = [
-      { href: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
-      // Reordenado: primero Clientes, luego Cobradores, Rutas, Préstamos y Reportes
-      { href: '/admin/clients', icon: '👥', label: 'Clientes' },
-      { href: '/admin/collectors', icon: '🧑‍💼', label: 'Cobradores' },
-      { href: '/admin/routes', icon: '🗺️', label: 'Rutas' },
-      { href: '/admin/loans', icon: '💳', label: 'Préstamos' },
-      { href: '/admin/reports', icon: '📈', label: 'Reportes' },
-      { href: '/admin/payments', icon: '💵', label: 'Pagos' },
-      { href: '/admin/imports', icon: '📥', label: 'Importar' },
-    ]; %>
+<%
+  /**
+   * Sidebar de navegación — único punto de identidad y acciones globales
+   * (logo, menú, tema, usuario). No hay navbar superior: siguiendo el
+   * modelo de referencia, cada página gobierna su propio encabezado.
+   */
+  const menuItems = [
+    { href: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { href: '/admin/clients', label: 'Clientes', icon: 'clients' },
+    { href: '/admin/collectors', label: 'Cobradores', icon: 'collectors' },
+    { href: '/admin/routes', label: 'Rutas', icon: 'routes' },
+    { href: '/admin/loans', label: 'Préstamos', icon: 'loans' },
+    { href: '/admin/reports', label: 'Reportes', icon: 'reports' },
+    { href: '/admin/payments', label: 'Pagos', icon: 'payments' },
+    { href: '/admin/imports', label: 'Importar', icon: 'import' },
+  ];
 
-    <% menuItems.forEach(item => { %>
-      <a href="<%= item.href %>"
+  const adminItems = [
+    { href: '/admin/organizations', label: 'Organizaciones', icon: 'organizations' },
+    { href: '/admin/users', label: 'Usuarios', icon: 'users' },
+  ];
+
+  const isActive = (href) => typeof currentPath !== 'undefined' && currentPath === href;
+
+  const roleLabels = { SUPER_ADMIN: 'Super Admin', ADMIN: 'Administrador', COLLECTOR: 'Cobrador' };
+  const roleLabel = typeof user !== 'undefined' ? (roleLabels[user.role] || user.role) : '';
+  const initials = typeof user !== 'undefined'
+    ? ((user.firstName?.[0] || '') + (user.lastName?.[0] || '')).toUpperCase()
+    : '';
+
+  /** Devuelve el path SVG (stroke, 20x20) de un ícono de navegación por clave. */
+  const iconPath = (name) => ({
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="12" y="3" width="5" height="5" rx="1.5"/><rect x="12" y="10" width="5" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="3" rx="1.5"/>',
+    clients: '<circle cx="7.5" cy="6.5" r="2.75"/><path d="M2.5 17c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5"/><circle cx="14.5" cy="7" r="2.25"/><path d="M13 11.75c2.485 0 4.5 2.015 4.5 4.5"/>',
+    collectors: '<circle cx="10" cy="6.5" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/><path d="m7.5 16 1.8 1.8L14 13.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    routes: '<path d="M10 2c-3 0-5.5 2.24-5.5 5.5C4.5 11.5 10 18 10 18s5.5-6.5 5.5-10.5C15.5 4.24 13 2 10 2Z"/><circle cx="10" cy="7.5" r="2"/>',
+    loans: '<rect x="2.5" y="5" width="15" height="10.5" rx="1.75"/><path d="M2.5 8.5h15" stroke-linecap="round"/><path d="M5.5 12.25h3" stroke-linecap="round"/>',
+    reports: '<path d="M3 17V9M8.5 17V4M14 17v-6M17 17H3" stroke-linecap="round" stroke-linejoin="round"/>',
+    payments: '<circle cx="10" cy="10" r="7.25"/><path d="M10 6v8M12.25 8.1c0-1.16-1-2.1-2.25-2.1s-2.25.94-2.25 2c0 1.06 1 1.5 2.25 1.9s2.25.84 2.25 1.9c0 1.06-1 2.1-2.25 2.1S7.75 12.86 7.75 12" stroke-linecap="round"/>',
+    import: '<path d="M10 3v9.5M6.25 9.25 10 13l3.75-3.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 14.5v1.75a1.25 1.25 0 0 0 1.25 1.25h10.5a1.25 1.25 0 0 0 1.25-1.25V14.5" stroke-linecap="round"/>',
+    organizations: '<path d="M4 17V4.5A1.5 1.5 0 0 1 5.5 3h5A1.5 1.5 0 0 1 12 4.5V17"/><path d="M12 8.5h2.5A1.5 1.5 0 0 1 16 10v7"/><path d="M6.5 6.5h2M6.5 9.5h2M6.5 12.5h2" stroke-linecap="round"/><path d="M4 17h12" stroke-linecap="round"/>',
+    users: '<circle cx="7" cy="6" r="2.75"/><path d="M2 17c0-2.9 2.24-5.25 5-5.25s5 2.35 5 5.25"/><path d="M12.5 5.25a2.5 2.5 0 0 1 0 4.9M17 16.75c-.15-2.35-1.65-4.25-3.75-4.9" stroke-linecap="round"/>',
+  })[name] || '';
+
+  const navIcon = (name) => `<svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">${iconPath(name)}</svg>`;
+%>
+
+<!-- Barra superior móvil: logo + botón de menú (el sidebar se oculta bajo lg) -->
+<header class="lg:hidden sticky top-0 z-30 flex items-center justify-between h-14 px-4 bg-sidebar border-b border-line">
+  <div class="flex items-center gap-2">
+    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-brand text-white text-sm font-bold">$</span>
+    <span class="font-display text-base font-semibold text-ink">Paga Diario</span>
+  </div>
+  <button type="button" id="mobile-sidebar-toggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false"
+    class="p-2 -mr-2 rounded-lg text-ink-secondary hover:bg-surface-hover hover:text-ink transition-colors">
+    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75">
+      <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke-linecap="round" />
+    </svg>
+  </button>
+</header>
+
+<!-- Fondo oscuro al abrir el sidebar en móvil -->
+<div id="sidebar-backdrop" class="hidden fixed inset-0 z-40 bg-black/40 lg:hidden"></div>
+
+<aside id="sidebar"
+  class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 shrink-0 h-screen bg-sidebar border-r border-line
+         -translate-x-full transition-transform duration-200 ease-out
+         lg:sticky lg:top-0 lg:translate-x-0">
+
+  <!-- Logo (solo escritorio; en móvil vive en la barra superior) -->
+  <div class="hidden lg:flex items-center gap-2.5 h-16 px-5 border-b border-line-subtle shrink-0">
+    <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand text-white text-base font-bold shrink-0">$</span>
+    <span class="sidebar-label font-display text-lg font-semibold text-ink tracking-tight truncate">Paga Diario</span>
+  </div>
+
+  <!-- Navegación principal -->
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+    <% menuItems.forEach((item) => { %>
+      <a href="<%= item.href %>" title="<%= item.label %>"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-          <%= (typeof currentPath !== 'undefined' && currentPath === item.href)
-            ? 'bg-brand-green/10 text-brand-green'
-            : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-        <span><%= item.icon %></span>
-        <span><%= item.label %></span>
+          <%= isActive(item.href) ? 'bg-surface-hover text-ink' : 'text-ink-secondary hover:bg-surface-hover hover:text-ink' %>">
+        <%- navIcon(item.icon) %>
+        <span class="sidebar-label truncate"><%= item.label %></span>
       </a>
     <% }); %>
-  </nav>
 
-  <% if (typeof user !== 'undefined' && user.role === 'SUPER_ADMIN') { %>
-    <div class="mt-8 px-3">
-      <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+    <% if (typeof user !== 'undefined' && user.role === 'SUPER_ADMIN') { %>
+      <p class="sidebar-label px-3 pt-5 pb-1.5 text-xs font-semibold text-ink-muted uppercase tracking-wider">
         Administración
       </p>
-      <nav class="mt-2 space-y-1">
-        <a href="/admin/organizations"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-          <span>🏢</span>
-          <span>Organizaciones</span>
+      <% adminItems.forEach((item) => { %>
+        <a href="<%= item.href %>" title="<%= item.label %>"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+            <%= isActive(item.href) ? 'bg-surface-hover text-ink' : 'text-ink-secondary hover:bg-surface-hover hover:text-ink' %>">
+          <%- navIcon(item.icon) %>
+          <span class="sidebar-label truncate"><%= item.label %></span>
         </a>
-        <a href="/admin/users"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-          <span>👤</span>
-          <span>Usuarios</span>
-        </a>
-      </nav>
+      <% }); %>
+    <% } %>
+  </nav>
+
+  <!-- Pie: tema, usuario, colapsar -->
+  <div class="border-t border-line-subtle p-3 shrink-0 space-y-1">
+    <button type="button" id="theme-toggle"
+      class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-ink-secondary hover:bg-surface-hover hover:text-ink transition-colors">
+      <svg class="w-[18px] h-[18px] shrink-0 dark:hidden" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M17 10.8A7.2 7.2 0 0 1 8.2 2a7.2 7.2 0 1 0 8.8 8.8Z" stroke-linejoin="round" />
+      </svg>
+      <svg class="w-[18px] h-[18px] shrink-0 hidden dark:block" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="10" cy="10" r="3.25" />
+        <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7" stroke-linecap="round" />
+      </svg>
+      <span class="sidebar-label"><span class="dark:hidden">Modo oscuro</span><span class="hidden dark:inline">Modo claro</span></span>
+    </button>
+
+    <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg">
+      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-brand/15 text-brand text-xs font-bold shrink-0">
+        <%= initials %>
+      </div>
+      <div class="sidebar-label min-w-0 flex-1">
+        <p class="text-sm font-medium text-ink truncate"><%= user.firstName %> <%= user.lastName %></p>
+        <p class="text-xs text-ink-muted truncate"><%= roleLabel %></p>
+      </div>
+      <form action="/admin/logout" method="POST" class="sidebar-label shrink-0">
+        <button type="submit" title="Cerrar sesión" aria-label="Cerrar sesión"
+          class="p-1.5 -m-1.5 rounded-md text-ink-muted hover:text-danger hover:bg-danger/10 transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M7.5 17.5h-3a1.5 1.5 0 0 1-1.5-1.5v-12A1.5 1.5 0 0 1 4.5 2.5h3M13.5 14l3.5-4-3.5-4M17 10H7.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </form>
     </div>
-  <% } %>
+
+    <button type="button" id="sidebar-collapse-toggle"
+      class="hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors">
+      <svg id="sidebar-collapse-icon" class="w-[18px] h-[18px] shrink-0 transition-transform" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12.5 4 7 10l5.5 6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="sidebar-label">Contraer</span>
+    </button>
+  </div>
 </aside>
+
+<script src="/js/sidebar.js" defer></script>

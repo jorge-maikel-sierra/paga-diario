@@ -23,13 +23,13 @@ const ROLE_OPTIONS = [
   ========================================= -->
   <div class="flex items-center gap-4">
     <a href="/admin/users"
-       class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300
-              text-gray-500 hover:bg-gray-50 transition-colors">
+       class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-line
+              text-ink-secondary hover:bg-surface-hover transition-colors">
       ←
     </a>
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Editar Usuario</h1>
-      <p class="text-sm text-gray-500 mt-1">
+      <h1 class="text-2xl font-bold text-ink">Editar Usuario</h1>
+      <p class="text-sm text-ink-secondary mt-1">
         Modificando: <span class="font-medium"><%= targetUser.firstName %> <%= targetUser.lastName %></span>
       </p>
     </div>
@@ -39,10 +39,10 @@ const ROLE_OPTIONS = [
        MENSAJE DE ERROR
   ========================================= -->
   <% if (typeof flashError !== 'undefined' && flashError) { %>
-    <div class="rounded-lg bg-red-50 border border-red-200 p-4" role="alert">
+    <div class="flash-error" role="alert">
       <div class="flex items-center gap-2">
-        <span class="text-red-600 text-lg">❌</span>
-        <p class="text-sm font-medium text-red-800"><%= flashError %></p>
+        <span class="text-danger text-lg shrink-0">❌</span>
+        <p class="flash-error-text"><%= flashError %></p>
       </div>
     </div>
   <% } %>
@@ -173,9 +173,9 @@ const ROLE_OPTIONS = [
           id="isActive"
           name="isActive"
           <%= targetUser.isActive ? 'checked' : '' %>
-          class="w-5 h-5 rounded border-gray-300 text-brand-green accent-brand-green focus:ring-brand-green"
+          class="w-5 h-5 rounded border-line text-brand-green accent-brand-green focus:ring-brand-green"
         />
-        <label for="isActive" class="text-sm text-gray-700">
+        <label for="isActive" class="text-sm text-ink">
           Usuario activo (puede iniciar sesión)
         </label>
       </div>
@@ -184,7 +184,7 @@ const ROLE_OPTIONS = [
     <!-- =========================================
          BOTONES DE ACCIÓN
     ========================================= -->
-    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
+    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-line-subtle">
       <button type="submit" class="flex-1 btn-primary justify-center">
         💾 Guardar Cambios
       </button>

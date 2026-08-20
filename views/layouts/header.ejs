@@ -5,45 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Paga Diario Admin</title>
 
-    <!-- Tailwind CSS compilado (desarrollo) / CDN (producción) -->
-    <link href="/css/styles.css" rel="stylesheet" />
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- Evita el parpadeo de tema: aplica la clase `dark` antes del primer
+         pintado, leyendo la preferencia guardada o la del sistema. -->
     <script>
-      // tailwind.config = {
-      //   darkMode: 'class',
-      //   theme: {
-      //     extend: {
-      //       colors: {
-      //         brand: {
-      //           green: '#00C566',
-      //           navy: '#0A1628',
-      //         },
-      //       },
-      //       fontFamily: {
-      //         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-      //       },
-      //     },
-      //   },
-      // };
+      (function () {
+        var stored = localStorage.getItem('theme');
+        var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', isDark);
+      })();
     </script>
 
-    <!-- Google Fonts: Inter -->
+    <!-- Evita el parpadeo del sidebar colapsado: la clase va en <html>
+         (igual que el tema) para que el CSS la vea antes de pintar,
+         sin esperar a que exista el <aside> en el DOM. -->
+    <script>
+      (function () {
+        if (localStorage.getItem('sidebarCollapsed') === '1') {
+          document.documentElement.classList.add('sidebar-collapsed');
+        }
+      })();
+    </script>
+
+    <!-- Tailwind CSS compilado -->
+    <link href="/css/styles.css" rel="stylesheet" />
+
+    <!-- Google Fonts: Inter (texto) + Lexend (títulos) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body class="h-full bg-gray-50 font-sans text-gray-900 antialiased">
-    <!-- Navbar -->
-    <%- include('../partials/_navbar') %>
-
-    <div class="flex">
-      <!-- Sidebar -->
+  <body class="h-full bg-app font-sans text-ink antialiased">
+    <div class="flex flex-col lg:flex-row h-full">
+      <!-- Sidebar (incluye la barra superior móvil, fuera del flujo en fixed/hidden) -->
       <%- include('../partials/_sidebar') %>
 
       <!-- Main content -->
-      <main class="flex-1 min-h-[calc(100vh-4rem)] overflow-y-auto">
+      <main class="flex-1 min-h-screen overflow-y-auto">
         <!-- Flash messages -->
         <%- include('../partials/_flash') %>

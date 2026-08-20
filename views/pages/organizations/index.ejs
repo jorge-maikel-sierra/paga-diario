@@ -58,7 +58,7 @@ function planBadge(planType) {
   const map = {
     BASIC:      { bg: 'bg-gray-600', text: 'text-gray-100', label: 'Básico' },
     PRO:        { bg: 'bg-green-600', text: 'text-white', label: 'Pro' },
-    ENTERPRISE: { bg: 'bg-yellow-500', text: 'text-brand-navy', label: 'Enterprise' },
+    ENTERPRISE: { bg: 'bg-yellow-500', text: 'text-ink', label: 'Enterprise' },
   };
   return map[planType] || { bg: 'bg-gray-500', text: 'text-white', label: planType };
 }
@@ -73,11 +73,11 @@ function planBadge(planType) {
   ========================================= -->
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">
+      <h1 class="text-2xl font-bold text-ink">
         Gestión de Organizaciones
         <span class="text-brand-green">(Super Admin)</span>
       </h1>
-      <p class="text-sm text-gray-500 mt-1">
+      <p class="text-sm text-ink-secondary mt-1">
         Administra los tenants y sus configuraciones de suscripción
       </p>
     </div>
@@ -93,14 +93,14 @@ function planBadge(planType) {
           class="w-full sm:w-64 form-input"
         />
         <button type="submit"
-                class="px-4 py-2.5 rounded-lg bg-white border border-gray-200
-                       text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+                class="px-4 py-2.5 rounded-lg bg-surface border border-line
+                       text-ink-secondary text-sm font-semibold hover:bg-surface-hover transition">
           🔍
         </button>
         <% if (search) { %>
           <a href="/admin/organizations"
-             class="px-4 py-2.5 rounded-lg border border-gray-200 text-gray-500 text-sm
-                    hover:bg-gray-50 transition flex items-center">
+             class="px-4 py-2.5 rounded-lg border border-line text-ink-secondary text-sm
+                    hover:bg-surface-hover transition flex items-center">
             ✕
           </a>
         <% } %>
@@ -126,20 +126,20 @@ function planBadge(planType) {
       const expiredOrgs = organizations.filter(o => isExpired(o.subscriptionEnds)).length;
       const proOrgs = organizations.filter(o => o.planType === 'PRO' || o.planType === 'ENTERPRISE').length;
     %>
-    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p class="text-xs text-gray-500 uppercase tracking-wide">Total</p>
-      <p class="text-2xl font-bold text-brand-navy"><%= totalOrgs %></p>
+    <div class="bg-surface border border-line rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-ink-secondary uppercase tracking-wide">Total</p>
+      <p class="text-2xl font-bold text-ink"><%= totalOrgs %></p>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p class="text-xs text-gray-500 uppercase tracking-wide">Activas</p>
+    <div class="bg-surface border border-line rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-ink-secondary uppercase tracking-wide">Activas</p>
       <p class="text-2xl font-bold text-brand-green"><%= activeOrgs %></p>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p class="text-xs text-gray-500 uppercase tracking-wide">Expiradas</p>
+    <div class="bg-surface border border-line rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-ink-secondary uppercase tracking-wide">Expiradas</p>
       <p class="text-2xl font-bold text-red-500"><%= expiredOrgs %></p>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p class="text-xs text-gray-500 uppercase tracking-wide">Pro/Enterprise</p>
+    <div class="bg-surface border border-line rounded-xl p-4 shadow-sm">
+      <p class="text-xs text-ink-secondary uppercase tracking-wide">Pro/Enterprise</p>
       <p class="text-2xl font-bold text-amber-500"><%= proOrgs %></p>
     </div>
   </div>
@@ -147,13 +147,13 @@ function planBadge(planType) {
   <!-- =========================================
        TABLA DE ORGANIZACIONES
   ========================================= -->
-  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+  <div class="bg-surface border border-line rounded-xl overflow-hidden shadow-sm">
 
     <% if (organizations.length === 0) { %>
       <!-- Estado vacío -->
       <div class="py-16 text-center">
         <span class="text-5xl block mb-4">🏢</span>
-        <p class="text-base font-medium text-gray-500">
+        <p class="text-base font-medium text-ink-secondary">
           <% if (search) { %>
             No se encontraron organizaciones para "<%= search %>"
           <% } else { %>
@@ -171,39 +171,39 @@ function planBadge(planType) {
 
       <!-- Tabla responsiva -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-100 text-sm">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-line-subtle text-sm">
+          <thead class="bg-app">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Logo / Nombre
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 NIT
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Plan
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Vencimiento
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Config. Mora
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Usuarios
               </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th class="px-4 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-line-subtle">
             <% organizations.forEach(function(org) { %>
               <%
                 const badge = planBadge(org.planType);
                 const expired = isExpired(org.subscriptionEnds);
               %>
-              <tr class="hover:bg-gray-50 transition-colors">
+              <tr class="hover:bg-surface-hover transition-colors">
 
                 <!-- Logo / Nombre -->
                 <td class="px-4 py-4">
@@ -212,7 +212,7 @@ function planBadge(planType) {
                       <img
                         src="<%= org.logoUrl %>"
                         alt="<%= org.name %>"
-                        class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                        class="w-10 h-10 rounded-full object-cover border-2 border-line"
                       />
                     <% } else { %>
                       <div class="w-10 h-10 rounded-full bg-brand-green/10 border-2 border-brand-green/30
@@ -223,9 +223,9 @@ function planBadge(planType) {
                       </div>
                     <% } %>
                     <div>
-                      <p class="font-semibold text-brand-navy"><%= org.name %></p>
+                      <p class="font-semibold text-ink"><%= org.name %></p>
                       <% if (!org.isActive) { %>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-50 text-red-600">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-danger/10 text-danger">
                           Inactiva
                         </span>
                       <% } %>
@@ -234,7 +234,7 @@ function planBadge(planType) {
                 </td>
 
                 <!-- NIT -->
-                <td class="px-4 py-4 text-gray-600">
+                <td class="px-4 py-4 text-ink-secondary">
                   <%= org.nit || 'N/A' %>
                 </td>
 
@@ -251,31 +251,31 @@ function planBadge(planType) {
                   <% if (org.subscriptionEnds) { %>
                     <% if (expired) { %>
                       <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold
-                                   bg-red-50 text-red-600">
+                                   bg-danger/10 text-danger">
                         ⚠️ Expirada
                       </span>
-                      <p class="text-xs text-gray-400 mt-1"><%= formatDate(org.subscriptionEnds) %></p>
+                      <p class="text-xs text-ink-muted mt-1"><%= formatDate(org.subscriptionEnds) %></p>
                     <% } else { %>
-                      <span class="text-gray-600"><%= formatDate(org.subscriptionEnds) %></span>
+                      <span class="text-ink-secondary"><%= formatDate(org.subscriptionEnds) %></span>
                     <% } %>
                   <% } else { %>
-                    <span class="text-gray-400">Sin límite</span>
+                    <span class="text-ink-muted">Sin límite</span>
                   <% } %>
                 </td>
 
                 <!-- Configuración Mora -->
                 <td class="px-4 py-4 text-center">
-                  <div class="text-xs text-gray-500">
+                  <div class="text-xs text-ink-secondary">
                     <span class="text-brand-green font-semibold"><%= org.moraGraceDays %></span> días gracia
                   </div>
-                  <div class="text-xs text-gray-500">
+                  <div class="text-xs text-ink-secondary">
                     <span class="text-amber-500 font-semibold"><%= org.moraMultiplier %>x</span> multiplicador
                   </div>
                 </td>
 
                 <!-- Usuarios -->
                 <td class="px-4 py-4 text-center">
-                  <span class="inline-flex items-center gap-1 text-gray-600">
+                  <span class="inline-flex items-center gap-1 text-ink-secondary">
                     👤 <%= org._count.users %>
                   </span>
                 </td>
@@ -286,13 +286,13 @@ function planBadge(planType) {
                     <a href="/admin/organizations/<%= org.id %>"
                        title="Ver Detalles"
                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg
-                              bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                              bg-info/10 text-info hover:bg-info/15 transition-colors">
                       👁
                     </a>
                     <a href="/admin/organizations/<%= org.id %>/edit"
                        title="Editar"
                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg
-                              bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors">
+                              bg-warning/10 text-warning hover:bg-warning/15 transition-colors">
                       ✏️
                     </a>
                   </div>

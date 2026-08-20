@@ -7,8 +7,8 @@
   ========================================= -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Gestión de Rutas</h1>
-      <p class="text-sm text-gray-500 mt-1">
+      <h1 class="text-2xl font-bold text-ink">Gestión de Rutas</h1>
+      <p class="text-sm text-ink-secondary mt-1">
         <%= routes.length %> ruta<%= routes.length !== 1 ? 's' : '' %> registrada<%= routes.length !== 1 ? 's' : '' %>
       </p>
     </div>
@@ -23,10 +23,10 @@
        ESTADO VACÍO
   ========================================= -->
   <% if (routes.length === 0) { %>
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm py-20 text-center">
+    <div class="bg-surface rounded-xl border border-line shadow-sm py-20 text-center">
       <span class="text-5xl block mb-4">🗺️</span>
-      <p class="text-base font-semibold text-gray-600">No hay rutas registradas</p>
-      <p class="text-sm text-gray-400 mt-1">Crea la primera ruta para comenzar a organizar los cobros.</p>
+      <p class="text-base font-semibold text-ink-secondary">No hay rutas registradas</p>
+      <p class="text-sm text-ink-muted mt-1">Crea la primera ruta para comenzar a organizar los cobros.</p>
       <a href="/admin/routes/new"
         class="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-green
                text-white text-sm font-semibold hover:bg-green-500 transition-colors">
@@ -39,45 +39,45 @@
   <!-- =========================================
        TABLA DE RUTAS
   ========================================= -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+  <div class="bg-surface rounded-xl border border-line shadow-sm overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 border-b border-gray-200">
+      <thead class="bg-app border-b border-line">
         <tr>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Nombre de la Ruta
           </th>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Descripción
           </th>
-          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Cobrador asignado
           </th>
-          <th class="px-5 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Clientes
           </th>
-          <th class="px-5 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Estado
           </th>
-          <th class="px-5 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <th class="px-5 py-3 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">
             Acciones
           </th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-line-subtle">
         <% routes.forEach(function(route) { %>
-          <tr class="hover:bg-gray-50 transition-colors">
+          <tr class="hover:bg-surface-hover transition-colors">
 
             <!-- Nombre de la ruta -->
             <td class="px-5 py-4">
-              <span class="font-semibold text-brand-navy"><%= route.name %></span>
+              <span class="font-semibold text-ink"><%= route.name %></span>
             </td>
 
             <!-- Descripción -->
-            <td class="px-5 py-4 text-gray-500 text-xs max-w-xs">
+            <td class="px-5 py-4 text-ink-secondary text-xs max-w-xs">
               <% if (route.description) { %>
                 <%= route.description %>
               <% } else { %>
-                <span class="text-gray-300 italic">—</span>
+                <span class="text-ink-muted italic">—</span>
               <% } %>
             </td>
 
@@ -89,13 +89,13 @@
                               text-white text-xs font-bold shrink-0">
                     <%= route.collector.firstName.charAt(0).toUpperCase() %><%= route.collector.lastName.charAt(0).toUpperCase() %>
                   </div>
-                  <span class="text-sm font-medium text-gray-700">
+                  <span class="text-sm font-medium text-ink">
                     <%= route.collector.firstName %> <%= route.collector.lastName %>
                   </span>
                 </div>
               <% } else { %>
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                             text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">
+                             text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
                   ⚠ Sin cobrador asignado
                 </span>
               <% } %>
@@ -104,7 +104,7 @@
             <!-- Número de clientes -->
             <td class="px-5 py-4 text-center">
               <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
-                           bg-blue-50 text-blue-700 text-xs font-bold">
+                           bg-info/10 text-info text-xs font-bold">
                 <%= route._count.clients %>
               </span>
             </td>
@@ -118,7 +118,7 @@
                 </span>
               <% } else { %>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full
-                             text-xs font-semibold bg-gray-100 text-gray-500">
+                             text-xs font-semibold bg-surface-hover text-ink-secondary">
                   ● Inactiva
                 </span>
               <% } %>
@@ -135,8 +135,8 @@
                 </a>
                 <a href="/admin/routes/<%= route.id %>/edit"
                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                         border border-gray-300 text-gray-600 text-xs font-semibold
-                         hover:bg-gray-100 transition-colors">
+                         border border-line text-ink-secondary text-xs font-semibold
+                         hover:bg-surface-hover transition-colors">
                   ✏️ Editar
                 </a>
               </div>

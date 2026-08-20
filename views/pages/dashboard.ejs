@@ -14,16 +14,16 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Dashboard</h1>
-      <p class="text-sm text-gray-500 mt-1">Resumen general de la operación</p>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Resumen general de la operación</p>
     </div>
     <div class="flex items-center gap-2">
-      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-brand-green/10 text-brand-green">
-        <span class="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
+      <span class="badge-success">
+        <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
         En vivo
       </span>
       <span id="live-payments-badge"
-        class="hidden inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white text-xs font-bold">
+        class="hidden inline-flex items-center justify-center w-6 h-6 rounded-full bg-danger text-white text-xs font-bold">
         0
       </span>
     </div>
@@ -32,36 +32,36 @@
   <!-- KPI Cards Row 1: Financial -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Capital desembolsado</p>
+        <p class="text-sm font-medium text-ink-secondary">Capital desembolsado</p>
         <span class="text-2xl">💰</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-navy"><%= formatCOP(kpis.totalDisbursed) %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-ink tabular-nums"><%= formatCOP(kpis.totalDisbursed) %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Total recaudado</p>
+        <p class="text-sm font-medium text-ink-secondary">Total recaudado</p>
         <span class="text-2xl">📥</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-green"><%= formatCOP(kpis.totalCollected) %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-success tabular-nums"><%= formatCOP(kpis.totalCollected) %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Saldo pendiente</p>
+        <p class="text-sm font-medium text-ink-secondary">Saldo pendiente</p>
         <span class="text-2xl">🏦</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-yellow-600"><%= formatCOP(kpis.totalOutstanding) %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-warning tabular-nums"><%= formatCOP(kpis.totalOutstanding) %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Mora acumulada</p>
+        <p class="text-sm font-medium text-ink-secondary">Mora acumulada</p>
         <span class="text-2xl">⚠️</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-red-600"><%= formatCOP(kpis.totalMora) %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-danger tabular-nums"><%= formatCOP(kpis.totalMora) %></p>
     </div>
 
   </div>
@@ -69,37 +69,37 @@
   <!-- KPI Cards Row 2: Operational -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Préstamos activos</p>
+        <p class="text-sm font-medium text-ink-secondary">Préstamos activos</p>
         <span class="text-2xl">💳</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-navy"><%= kpis.activeLoans %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-ink tabular-nums"><%= kpis.activeLoans %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Clientes</p>
+        <p class="text-sm font-medium text-ink-secondary">Clientes</p>
         <span class="text-2xl">👥</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-navy"><%= kpis.totalClients %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-ink tabular-nums"><%= kpis.totalClients %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Cobradores activos</p>
+        <p class="text-sm font-medium text-ink-secondary">Cobradores activos</p>
         <span class="text-2xl">🧑‍💼</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-navy"><%= kpis.totalCollectors %></p>
+      <p class="mt-2 text-2xl font-display font-bold text-ink tabular-nums"><%= kpis.totalCollectors %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+    <div class="card p-5">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Recaudación hoy</p>
+        <p class="text-sm font-medium text-ink-secondary">Recaudación hoy</p>
         <span class="text-2xl">📅</span>
       </div>
-      <p class="mt-2 text-2xl font-bold text-brand-green"><%= formatCOP(kpis.todayCollected) %></p>
-      <p class="mt-1 text-xs text-gray-400"><%= kpis.todayPayments %> pagos registrados</p>
+      <p class="mt-2 text-2xl font-display font-bold text-success tabular-nums"><%= formatCOP(kpis.todayCollected) %></p>
+      <p class="mt-1 text-xs text-ink-muted"><%= kpis.todayPayments %> pagos registrados</p>
     </div>
 
   </div>
@@ -108,21 +108,20 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
     <!-- Mora Alerts -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+    <div class="card">
+      <div class="flex items-center justify-between p-5 border-b border-line-subtle">
         <div class="flex items-center gap-2">
           <span class="text-lg">🚨</span>
-          <h2 class="text-lg font-semibold text-brand-navy">Alertas de mora</h2>
+          <h2 class="text-lg font-display font-semibold text-ink">Alertas de mora</h2>
         </div>
-        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold
-          <%= kpis.overdueSchedules > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' %>">
+        <span class="<%= kpis.overdueSchedules > 0 ? 'badge-danger' : 'badge-success' %> font-bold">
           <%= kpis.overdueSchedules %>
         </span>
       </div>
 
-      <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+      <div class="divide-y divide-line-subtle max-h-80 overflow-y-auto">
         <% if (!kpis.moraAlerts || kpis.moraAlerts.length === 0) { %>
-          <div class="p-8 text-center text-gray-400 text-sm">✅ No hay cuotas vencidas</div>
+          <div class="p-8 text-center text-ink-muted text-sm">✅ No hay cuotas vencidas</div>
         <% } else { %>
           <% kpis.moraAlerts.forEach((alert) => {
             const client = alert.loan.client;
@@ -131,17 +130,15 @@
             const daysOverdue = Math.floor((Date.now() - new Date(alert.dueDate).getTime()) / (1000 * 60 * 60 * 24));
             const owed = Number(alert.amountDue) - Number(alert.amountPaid);
           %>
-            <div class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+            <div class="flex items-center justify-between px-5 py-3 hover:bg-surface-hover transition-colors">
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900 truncate"><%= client.firstName %> <%= client.lastName %></p>
-                <p class="text-xs text-gray-500">Cuota #<%= alert.installmentNumber %> · Venció <%= dueDate %></p>
-                <p class="text-xs text-gray-400">Cobrador: <%= collector.firstName %> <%= collector.lastName %></p>
+                <p class="text-sm font-medium text-ink truncate"><%= client.firstName %> <%= client.lastName %></p>
+                <p class="text-xs text-ink-secondary">Cuota #<%= alert.installmentNumber %> · Venció <%= dueDate %></p>
+                <p class="text-xs text-ink-muted">Cobrador: <%= collector.firstName %> <%= collector.lastName %></p>
               </div>
               <div class="text-right ml-4 flex-shrink-0">
-                <p class="text-sm font-bold text-red-600"><%= formatCOP(owed) %></p>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
-                  <%= daysOverdue %> días
-                </span>
+                <p class="text-sm font-bold text-danger tabular-nums"><%= formatCOP(owed) %></p>
+                <span class="badge-danger"><%= daysOverdue %> días</span>
               </div>
             </div>
           <% }); %>
@@ -150,17 +147,17 @@
     </div>
 
     <!-- Recent Payments -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+    <div class="card">
+      <div class="flex items-center justify-between p-5 border-b border-line-subtle">
         <div class="flex items-center gap-2">
           <span class="text-lg">💵</span>
-          <h2 class="text-lg font-semibold text-brand-navy">Pagos recientes</h2>
+          <h2 class="text-lg font-display font-semibold text-ink">Pagos recientes</h2>
         </div>
       </div>
 
-      <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+      <div class="divide-y divide-line-subtle max-h-80 overflow-y-auto">
         <% if (!kpis.recentPayments || kpis.recentPayments.length === 0) { %>
-          <div class="p-8 text-center text-gray-400 text-sm">No hay pagos registrados</div>
+          <div class="p-8 text-center text-ink-muted text-sm">No hay pagos registrados</div>
         <% } else { %>
           <% kpis.recentPayments.forEach((payment) => {
             const client = payment.loan.client;
@@ -169,12 +166,12 @@
               day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
             });
           %>
-            <div class="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+            <div class="flex items-center justify-between px-5 py-3 hover:bg-surface-hover transition-colors">
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900 truncate"><%= client.firstName %> <%= client.lastName %></p>
-                <p class="text-xs text-gray-500"><%= dateStr %> · <%= collector.firstName %> <%= collector.lastName %></p>
+                <p class="text-sm font-medium text-ink truncate"><%= client.firstName %> <%= client.lastName %></p>
+                <p class="text-xs text-ink-secondary"><%= dateStr %> · <%= collector.firstName %> <%= collector.lastName %></p>
               </div>
-              <p class="text-sm font-bold text-brand-green ml-4 flex-shrink-0"><%= formatCOP(payment.totalReceived) %></p>
+              <p class="text-sm font-bold text-success ml-4 flex-shrink-0 tabular-nums"><%= formatCOP(payment.totalReceived) %></p>
             </div>
           <% }); %>
         <% } %>

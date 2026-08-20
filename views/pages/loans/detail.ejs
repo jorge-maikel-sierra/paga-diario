@@ -4,7 +4,7 @@ const STATUS_MAP = {
   PENDING:   { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pendiente'   },
   COMPLETED: { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Completado'  },
   DEFAULTED: { bg: 'bg-red-100',    text: 'text-red-700',    label: 'En mora'     },
-  CANCELLED: { bg: 'bg-gray-100',   text: 'text-gray-600',   label: 'Cancelado'   },
+  CANCELLED: { bg: 'bg-surface-hover',   text: 'text-ink-secondary',   label: 'Cancelado'   },
 };
 
 const FREQ_MAP = {
@@ -58,7 +58,7 @@ function formatDateTime(date) {
   });
 }
 
-const badge = STATUS_MAP[loan.status] || { bg: 'bg-gray-100', text: 'text-gray-500', label: loan.status };
+const badge = STATUS_MAP[loan.status] || { bg: 'bg-surface-hover', text: 'text-ink-secondary', label: loan.status };
 
 // Calcular progreso con clamp defensivo: si el préstamo está COMPLETED, mostrar 100%
 let progressPct;
@@ -77,11 +77,11 @@ if (loan.status === 'COMPLETED') {
   <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
     <div class="flex items-center gap-3">
       <a href="/admin/loans"
-         class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-brand-navy transition-colors">
+         class="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink transition-colors">
         ← Préstamos
       </a>
-      <span class="text-gray-300">/</span>
-      <span class="text-sm text-gray-500">
+      <span class="text-ink-muted">/</span>
+      <span class="text-sm text-ink-secondary">
         <%= loan.client.firstName %> <%= loan.client.lastName %>
       </span>
     </div>
@@ -93,51 +93,51 @@ if (loan.status === 'COMPLETED') {
 
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">
+      <h1 class="text-2xl font-bold text-ink">
         Préstamo — <%= loan.client.firstName %> <%= loan.client.lastName %>
       </h1>
-      <p class="text-xs text-gray-400 mt-0.5 font-mono"><%= loan.id %></p>
+      <p class="text-xs text-ink-muted mt-0.5 font-mono"><%= loan.id %></p>
     </div>
   </div>
 
   <!-- KPIs rápidos -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Capital</p>
-      <p class="text-xl font-bold text-brand-navy mt-1"><%= formatCOP(loan.principalAmount) %></p>
+    <div class="bg-surface rounded-xl border border-line shadow-sm p-4">
+      <p class="text-xs font-medium text-ink-secondary uppercase tracking-wide">Capital</p>
+      <p class="text-xl font-bold text-ink mt-1"><%= formatCOP(loan.principalAmount) %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Saldo pendiente</p>
-      <p class="text-xl font-bold <%= loan.status === 'DEFAULTED' ? 'text-red-600' : 'text-brand-navy' %> mt-1">
+    <div class="bg-surface rounded-xl border border-line shadow-sm p-4">
+      <p class="text-xs font-medium text-ink-secondary uppercase tracking-wide">Saldo pendiente</p>
+      <p class="text-xl font-bold <%= loan.status === 'DEFAULTED' ? 'text-red-600' : 'text-ink' %> mt-1">
         <%= formatCOP(loan.outstandingBalance) %>
       </p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total pagado</p>
+    <div class="bg-surface rounded-xl border border-line shadow-sm p-4">
+      <p class="text-xs font-medium text-ink-secondary uppercase tracking-wide">Total pagado</p>
       <p class="text-xl font-bold text-green-600 mt-1"><%= formatCOP(loan.totalPaid) %></p>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Cuota</p>
-      <p class="text-xl font-bold text-brand-navy mt-1"><%= formatCOP(loan.installmentAmount) %></p>
-      <p class="text-xs text-gray-400 mt-0.5"><%= FREQ_MAP[loan.paymentFrequency] || loan.paymentFrequency %></p>
+    <div class="bg-surface rounded-xl border border-line shadow-sm p-4">
+      <p class="text-xs font-medium text-ink-secondary uppercase tracking-wide">Cuota</p>
+      <p class="text-xl font-bold text-ink mt-1"><%= formatCOP(loan.installmentAmount) %></p>
+      <p class="text-xs text-ink-muted mt-0.5"><%= FREQ_MAP[loan.paymentFrequency] || loan.paymentFrequency %></p>
     </div>
 
   </div>
 
   <!-- Progreso de cuotas -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+  <div class="bg-surface rounded-xl border border-line shadow-sm p-4">
     <div class="flex items-center justify-between mb-2">
-      <p class="text-sm font-medium text-gray-700">Progreso de cuotas</p>
-      <p class="text-sm font-semibold text-brand-navy">
+      <p class="text-sm font-medium text-ink">Progreso de cuotas</p>
+      <p class="text-sm font-semibold text-ink">
         <%= loan.paidPayments %> / <%= loan.numberOfPayments %>
-        <span class="text-gray-400 font-normal ml-1">(<%= progressPct %>%)</span>
+        <span class="text-ink-muted font-normal ml-1">(<%= progressPct %>%)</span>
       </p>
     </div>
-    <div class="w-full bg-gray-100 rounded-full h-2.5">
+    <div class="w-full bg-surface-hover rounded-full h-2.5">
       <div class="bg-brand-green h-2.5 rounded-full transition-all"
            style="width: <%= progressPct %>%"></div>
     </div>
@@ -152,42 +152,42 @@ if (loan.status === 'COMPLETED') {
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
     <!-- Datos del préstamo -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div class="px-5 py-3 border-b border-gray-100">
-        <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">Datos del préstamo</h2>
+    <div class="bg-surface rounded-xl border border-line shadow-sm">
+      <div class="px-5 py-3 border-b border-line-subtle">
+        <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">Datos del préstamo</h2>
       </div>
-      <dl class="divide-y divide-gray-50">
+      <dl class="divide-y divide-line-subtle">
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Amortización</dt>
-          <dd class="font-medium text-gray-800"><%= AMORT_MAP[loan.amortizationType] || loan.amortizationType %></dd>
+          <dt class="text-ink-secondary">Amortización</dt>
+          <dd class="font-medium text-ink"><%= AMORT_MAP[loan.amortizationType] || loan.amortizationType %></dd>
         </div>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Tasa de interés</dt>
-          <dd class="font-medium text-gray-800">
+          <dt class="text-ink-secondary">Tasa de interés</dt>
+          <dd class="font-medium text-ink">
             <%= (parseFloat(loan.interestRate) * 100).toFixed(2) %>% por período
           </dd>
         </div>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Monto total</dt>
-          <dd class="font-medium text-gray-800"><%= formatCOP(loan.totalAmount) %></dd>
+          <dt class="text-ink-secondary">Monto total</dt>
+          <dd class="font-medium text-ink"><%= formatCOP(loan.totalAmount) %></dd>
         </div>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Fecha desembolso</dt>
-          <dd class="font-medium text-gray-800"><%= formatDate(loan.disbursementDate) %></dd>
+          <dt class="text-ink-secondary">Fecha desembolso</dt>
+          <dd class="font-medium text-ink"><%= formatDate(loan.disbursementDate) %></dd>
         </div>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Fecha fin esperada</dt>
-          <dd class="font-medium text-gray-800"><%= formatDate(loan.expectedEndDate) %></dd>
+          <dt class="text-ink-secondary">Fecha fin esperada</dt>
+          <dd class="font-medium text-ink"><%= formatDate(loan.expectedEndDate) %></dd>
         </div>
         <% if (loan.actualEndDate) { %>
           <div class="flex justify-between px-5 py-3 text-sm">
-            <dt class="text-gray-500">Fecha fin real</dt>
+            <dt class="text-ink-secondary">Fecha fin real</dt>
             <dd class="font-medium text-green-600"><%= formatDate(loan.actualEndDate) %></dd>
           </div>
         <% } %>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Cobrador</dt>
-          <dd class="font-medium text-gray-800">
+          <dt class="text-ink-secondary">Cobrador</dt>
+          <dd class="font-medium text-ink">
             <%= loan.collector.firstName %> <%= loan.collector.lastName %>
           </dd>
         </div>
@@ -195,48 +195,48 @@ if (loan.status === 'COMPLETED') {
     </div>
 
     <!-- Datos del cliente -->
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">Cliente</h2>
+    <div class="bg-surface rounded-xl border border-line shadow-sm">
+      <div class="px-5 py-3 border-b border-line-subtle flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">Cliente</h2>
         <a href="/admin/clients/<%= loan.client.id %>"
            class="text-xs text-brand-green hover:underline font-medium">
           Ver perfil →
         </a>
       </div>
-      <dl class="divide-y divide-gray-50">
+      <dl class="divide-y divide-line-subtle">
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Nombre</dt>
-          <dd class="font-medium text-gray-800">
+          <dt class="text-ink-secondary">Nombre</dt>
+          <dd class="font-medium text-ink">
             <%= loan.client.firstName %> <%= loan.client.lastName %>
           </dd>
         </div>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Documento</dt>
-          <dd class="font-medium text-gray-800">
+          <dt class="text-ink-secondary">Documento</dt>
+          <dd class="font-medium text-ink">
             <%= loan.client.documentType %> <%= loan.client.documentNumber %>
           </dd>
         </div>
         <% if (loan.client.phone) { %>
           <div class="flex justify-between px-5 py-3 text-sm">
-            <dt class="text-gray-500">Teléfono</dt>
-            <dd class="font-medium text-gray-800"><%= loan.client.phone %></dd>
+            <dt class="text-ink-secondary">Teléfono</dt>
+            <dd class="font-medium text-ink"><%= loan.client.phone %></dd>
           </div>
         <% } %>
         <% if (loan.client.address) { %>
           <div class="flex justify-between px-5 py-3 text-sm">
-            <dt class="text-gray-500">Dirección</dt>
-            <dd class="font-medium text-gray-800 text-right max-w-xs"><%= loan.client.address %></dd>
+            <dt class="text-ink-secondary">Dirección</dt>
+            <dd class="font-medium text-ink text-right max-w-xs"><%= loan.client.address %></dd>
           </div>
         <% } %>
         <!-- businessName removed from loan client display -->
         <% if (loan.client.route) { %>
           <div class="flex justify-between px-5 py-3 text-sm">
-            <dt class="text-gray-500">Ruta</dt>
-            <dd class="font-medium text-gray-800"><%= loan.client.route.name %></dd>
+            <dt class="text-ink-secondary">Ruta</dt>
+            <dd class="font-medium text-ink"><%= loan.client.route.name %></dd>
           </div>
         <% } %>
         <div class="flex justify-between px-5 py-3 text-sm">
-          <dt class="text-gray-500">Estado cliente</dt>
+          <dt class="text-ink-secondary">Estado cliente</dt>
           <dd>
             <% if (loan.client.isActive) { %>
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Activo</span>
@@ -251,9 +251,9 @@ if (loan.status === 'COMPLETED') {
   </div>
 
   <!-- Cronograma de pagos -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+  <div class="bg-surface rounded-xl border border-line shadow-sm overflow-hidden">
+    <div class="px-5 py-3 border-b border-line-subtle flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
         Cronograma de cuotas
       </h2>
       <%
@@ -261,7 +261,7 @@ if (loan.status === 'COMPLETED') {
         const paidSched      = activeSched.filter(s => s.isPaid);
         const restructSched  = loan.paymentSchedule.filter(s => s.isRestructured);
       %>
-      <span class="text-xs text-gray-400">
+      <span class="text-xs text-ink-muted">
         <%= paidSched.length %> pagadas / <%= activeSched.length %> activas
         <% if (restructSched.length > 0) { %>
           · <span class="text-purple-500"><%= restructSched.length %> restructuradas</span>
@@ -283,45 +283,45 @@ if (loan.status === 'COMPLETED') {
     %>
 
     <% if (loan.paymentSchedule.length === 0) { %>
-      <div class="py-8 text-center text-gray-400 text-sm">
+      <div class="py-8 text-center text-ink-muted text-sm">
         No hay cronograma generado para este préstamo.
       </div>
     <% } else { %>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-line text-sm">
+          <thead class="bg-app">
             <tr>
-              <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide w-12">#</th>
-              <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Vencimiento</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Capital</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Interés</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Cuota</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Pagado</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Mora</th>
-              <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+              <th class="px-4 py-2.5 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide w-12">#</th>
+              <th class="px-4 py-2.5 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">Vencimiento</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Capital</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Interés</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Cuota</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Pagado</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Mora</th>
+              <th class="px-4 py-2.5 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">Estado</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-line-subtle">
             <% loan.paymentSchedule.forEach(function(schedule) {
               const isOverdue = !schedule.isPaid && !schedule.isRestructured && new Date(schedule.dueDate) < new Date();
-              let rowClass = 'hover:bg-gray-50 transition-colors';
-              if (schedule.isPaid)         rowClass = 'bg-green-50 hover:bg-green-100 transition-colors';
-              else if (schedule.isRestructured) rowClass = 'bg-purple-50 opacity-60';
-              else if (isOverdue)          rowClass = 'bg-red-50 hover:bg-red-100 transition-colors';
+              let rowClass = 'hover:bg-surface-hover transition-colors';
+              if (schedule.isPaid)         rowClass = 'bg-success/10 hover:bg-success/15 transition-colors';
+              else if (schedule.isRestructured) rowClass = 'bg-purple-500/10 opacity-60';
+              else if (isOverdue)          rowClass = 'bg-danger/10 hover:bg-danger/15 transition-colors';
             %>
               <tr class="<%= rowClass %>">
-                <td class="px-4 py-2.5 text-center text-gray-500 font-mono text-xs">
+                <td class="px-4 py-2.5 text-center text-ink-secondary font-mono text-xs">
                   <%= schedule.installmentNumber %>
                 </td>
-                <td class="px-4 py-2.5 text-center text-gray-700">
+                <td class="px-4 py-2.5 text-center text-ink">
                   <%= formatDate(schedule.dueDate) %>
                   <% if (isOverdue) { %>
-                    <span class="ml-1 inline-flex px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-600 font-medium">Vencida</span>
+                    <span class="ml-1 badge-danger font-medium">Vencida</span>
                   <% } %>
                 </td>
-                <td class="px-4 py-2.5 text-right tabular-nums text-gray-700"><%= formatCOP(schedule.principalDue) %></td>
-                <td class="px-4 py-2.5 text-right tabular-nums text-gray-700"><%= formatCOP(schedule.interestDue) %></td>
-                <td class="px-4 py-2.5 text-right tabular-nums font-medium text-gray-800"><%= formatCOP(schedule.amountDue) %></td>
+                <td class="px-4 py-2.5 text-right tabular-nums text-ink"><%= formatCOP(schedule.principalDue) %></td>
+                <td class="px-4 py-2.5 text-right tabular-nums text-ink"><%= formatCOP(schedule.interestDue) %></td>
+                <td class="px-4 py-2.5 text-right tabular-nums font-medium text-ink"><%= formatCOP(schedule.amountDue) %></td>
                 <td class="px-4 py-2.5 text-right tabular-nums text-green-600">
                   <%= parseFloat(schedule.amountPaid) > 0 ? formatCOP(schedule.amountPaid) : '—' %>
                 </td>
@@ -330,21 +330,13 @@ if (loan.status === 'COMPLETED') {
                 </td>
                 <td class="px-4 py-2.5 text-center">
                   <% if (schedule.isPaid) { %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                      ✓ Pagada
-                    </span>
+                    <span class="badge-success">✓ Pagada</span>
                   <% } else if (schedule.isRestructured) { %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                      ↺ Restructurada
-                    </span>
+                    <span class="badge bg-purple-500/10 text-purple-600">↺ Restructurada</span>
                   <% } else if (isOverdue) { %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">
-                      ⚠ Vencida
-                    </span>
+                    <span class="badge-danger">⚠ Vencida</span>
                   <% } else { %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                      Pendiente
-                    </span>
+                    <span class="badge-warning">Pendiente</span>
                   <% } %>
                 </td>
               </tr>
@@ -354,7 +346,7 @@ if (loan.status === 'COMPLETED') {
       </div>
 
       <!-- Leyenda de estados del cronograma -->
-      <div class="px-5 py-3 border-t border-gray-100 flex flex-wrap gap-4 text-xs text-gray-500">
+      <div class="px-5 py-3 border-t border-line-subtle flex flex-wrap gap-4 text-xs text-ink-secondary">
         <span class="inline-flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-full bg-green-400 inline-block"></span> Pagada
         </span>
@@ -372,8 +364,8 @@ if (loan.status === 'COMPLETED') {
 
       <!-- Alerta de invariante financiero roto (indica inconsistencia en BD) -->
       <% if (!balanceCheck) { %>
-        <div class="px-5 py-3 bg-red-50 border-t border-red-200">
-          <p class="text-xs font-medium text-red-700">
+        <div class="px-5 py-3 bg-danger/10 border-t border-danger/20">
+          <p class="text-xs font-medium text-danger">
             ⚠ Inconsistencia detectada: el saldo pendiente no coincide con el capital
             del cronograma activo. Contacta al soporte técnico.
           </p>
@@ -383,12 +375,12 @@ if (loan.status === 'COMPLETED') {
   </div>
 
   <!-- Últimos pagos registrados -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-100">
-      <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+  <div class="bg-surface rounded-xl border border-line shadow-sm overflow-hidden">
+    <div class="px-5 py-3 border-b border-line-subtle">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
         Pagos registrados
         <% if (loan.payments.length > 0) { %>
-          <span class="ml-1 text-gray-400 font-normal normal-case text-xs">
+          <span class="ml-1 text-ink-muted font-normal normal-case text-xs">
             (últimos <%= loan.payments.length %>)
           </span>
         <% } %>
@@ -410,31 +402,31 @@ if (loan.status === 'COMPLETED') {
     %>
 
     <% if (loan.payments.length === 0) { %>
-      <div class="py-8 text-center text-gray-400 text-sm">
+      <div class="py-8 text-center text-ink-muted text-sm">
         No hay pagos registrados aún.
       </div>
     <% } else { %>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-line text-sm">
+          <thead class="bg-app">
             <tr>
-              <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Capital aplicado</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Interés aplicado</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Mora</th>
-              <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Total recibido</th>
-              <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipo</th>
-              <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Método</th>
-              <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Cobrador</th>
+              <th class="px-4 py-2.5 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">Fecha</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Capital aplicado</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Interés aplicado</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Mora</th>
+              <th class="px-4 py-2.5 text-right text-xs font-semibold text-ink-secondary uppercase tracking-wide">Total recibido</th>
+              <th class="px-4 py-2.5 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">Tipo</th>
+              <th class="px-4 py-2.5 text-center text-xs font-semibold text-ink-secondary uppercase tracking-wide">Método</th>
+              <th class="px-4 py-2.5 text-left text-xs font-semibold text-ink-secondary uppercase tracking-wide">Cobrador</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-line-subtle">
             <% loan.payments.forEach(function(payment) {
-              const typeInfo = PAYMENT_TYPE_MAP[payment.paymentType] || { bg: 'bg-gray-100', text: 'text-gray-500', label: payment.paymentType || '—' };
+              const typeInfo = PAYMENT_TYPE_MAP[payment.paymentType] || { bg: 'bg-surface-hover', text: 'text-ink-secondary', label: payment.paymentType || '—' };
             %>
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-2.5 text-gray-700 whitespace-nowrap"><%= formatDateTime(payment.collectedAt) %></td>
-                <td class="px-4 py-2.5 text-right tabular-nums text-gray-800 font-medium">
+              <tr class="hover:bg-surface-hover transition-colors">
+                <td class="px-4 py-2.5 text-ink whitespace-nowrap"><%= formatDateTime(payment.collectedAt) %></td>
+                <td class="px-4 py-2.5 text-right tabular-nums text-ink font-medium">
                   <%= parseFloat(payment.principalApplied) > 0 ? formatCOP(payment.principalApplied) : '—' %>
                 </td>
                 <td class="px-4 py-2.5 text-right tabular-nums text-blue-600">
@@ -451,11 +443,11 @@ if (loan.status === 'COMPLETED') {
                   </span>
                 </td>
                 <td class="px-4 py-2.5 text-center">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-hover text-ink-secondary">
                     <%= payment.paymentMethod %>
                   </span>
                 </td>
-                <td class="px-4 py-2.5 text-gray-700 whitespace-nowrap">
+                <td class="px-4 py-2.5 text-ink whitespace-nowrap">
                   <%= payment.collector.firstName %> <%= payment.collector.lastName %>
                 </td>
               </tr>
@@ -468,27 +460,27 @@ if (loan.status === 'COMPLETED') {
 
   <!-- Incidentes -->
   <% if (loan.incidents.length > 0) { %>
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div class="px-5 py-3 border-b border-gray-100">
-        <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+    <div class="bg-surface rounded-xl border border-line shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-line-subtle">
+        <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
           Incidentes
           <span class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-600 text-xs font-bold">
             <%= loan.incidents.length %>
           </span>
         </h2>
       </div>
-      <ul class="divide-y divide-gray-100">
+      <ul class="divide-y divide-line-subtle">
         <% loan.incidents.forEach(function(incident) {
           const inc = INCIDENT_MAP[incident.type] || { icon: '⚠️', label: incident.type };
         %>
           <li class="flex items-start gap-3 px-5 py-3">
             <span class="text-xl mt-0.5"><%= inc.icon %></span>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-800"><%= inc.label %></p>
+              <p class="text-sm font-medium text-ink"><%= inc.label %></p>
               <% if (incident.description) { %>
-                <p class="text-xs text-gray-500 mt-0.5"><%= incident.description %></p>
+                <p class="text-xs text-ink-secondary mt-0.5"><%= incident.description %></p>
               <% } %>
-              <p class="text-xs text-gray-400 mt-1">
+              <p class="text-xs text-ink-muted mt-1">
                 <%= formatDateTime(incident.reportedAt) %> ·
                 <%= incident.collector.firstName %> <%= incident.collector.lastName %>
               </p>
@@ -501,9 +493,9 @@ if (loan.status === 'COMPLETED') {
 
   <!-- Notas -->
   <% if (loan.notes) { %>
-    <div class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-      <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">📝 Notas internas</p>
-      <p class="text-sm text-amber-800"><%= loan.notes %></p>
+    <div class="bg-warning/10 border border-warning/20 rounded-xl px-5 py-4">
+      <p class="text-xs font-semibold text-warning uppercase tracking-wide mb-1">📝 Notas internas</p>
+      <p class="text-sm text-warning"><%= loan.notes %></p>
     </div>
   <% } %>
 

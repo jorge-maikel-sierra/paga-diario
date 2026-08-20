@@ -7,8 +7,8 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy dark:text-white">Clientes</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+      <h1 class="text-2xl font-bold text-ink">Clientes</h1>
+      <p class="text-sm text-ink-secondary mt-1">
         <%= clients.length %> cliente<%= clients.length !== 1 ? 's' : '' %> encontrado<%= clients.length !== 1 ? 's' : '' %>
       </p>
     </div>
@@ -22,8 +22,8 @@
             name="search"
             value="<%= typeof search !== 'undefined' ? search : '' %>"
             placeholder="Nombre, cédula o teléfono..."
-            class="w-full sm:w-72 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                   bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200
+            class="w-full sm:w-72 px-4 py-2 rounded-lg border border-line
+                   bg-surface text-sm text-ink
                    focus:ring-2 focus:ring-brand-green focus:outline-none transition"
           />
           <button type="submit"
@@ -33,8 +33,8 @@
           </button>
           <% if (typeof search !== 'undefined' && search) { %>
             <a href="/admin/clients"
-              class="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-600
-                     hover:bg-gray-100 transition-colors">
+              class="px-3 py-2 rounded-lg border border-line text-sm text-ink-secondary
+                     hover:bg-surface-hover transition-colors">
               ✕
             </a>
           <% } %>
@@ -43,31 +43,31 @@
 
       <!-- Botón Nuevo Cliente -->
       <a href="/admin/clients/new"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-navy text-white
-                text-sm font-semibold shadow-sm hover:bg-blue-800 transition-colors whitespace-nowrap">
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action text-action-on
+                text-sm font-semibold shadow-sm hover:bg-action-hover transition-colors whitespace-nowrap">
         ➕ Nuevo Cliente
       </a>
     </div>
   </div>
 
   <!-- Tabla -->
-  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto">
+  <div class="bg-surface rounded-xl border border-line shadow-sm overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 dark:bg-gray-800">
+      <thead class="bg-app">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Cliente</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Documento</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Teléfono</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Dirección</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Préstamos</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Estado</th>
-          <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Acciones</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Cliente</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Documento</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Teléfono</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Dirección</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Préstamos</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Estado</th>
+          <th class="px-4 py-3 text-left font-semibold text-ink">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <% if (clients.length === 0) { %>
           <tr>
-            <td colspan="7" class="px-4 py-10 text-center text-gray-400 dark:text-gray-500">
+            <td colspan="7" class="px-4 py-10 text-center text-ink-muted">
               <span class="text-4xl block mb-3">👥</span>
               <p class="font-medium">No se encontraron clientes</p>
               <% if (typeof search !== 'undefined' && search) { %>
@@ -77,28 +77,28 @@
           </tr>
         <% } else { %>
           <% clients.forEach(client => { %>
-            <tr class="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <tr class="border-t border-line-subtle hover:bg-surface-hover transition-colors">
               <td class="px-4 py-3">
                 <a href="/admin/clients/<%= client.id %>/edit"
-                  class="font-medium text-brand-navy dark:text-brand-green hover:underline">
+                  class="font-medium text-ink hover:underline">
                   <%= client.firstName %> <%= client.lastName %>
                 </a>
                 <!-- businessName removed from list -->
               </td>
-              <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
-                <span class="text-xs text-gray-400"><%= client.documentType %></span>
+              <td class="px-4 py-3 text-ink-secondary">
+                <span class="text-xs text-ink-muted"><%= client.documentType %></span>
                 <%= client.documentNumber %>
               </td>
-              <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+              <td class="px-4 py-3 text-ink-secondary">
                 <%= client.phone || '—' %>
               </td>
-              <td class="px-4 py-3 text-gray-600 dark:text-gray-300 max-w-[180px] truncate">
+              <td class="px-4 py-3 text-ink-secondary max-w-[180px] truncate">
                 <%= client.address || '—' %>
               </td>
               <td class="px-4 py-3">
                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
                   text-xs font-bold
-                  <%= client._count.loans > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500' %>">
+                  <%= client._count.loans > 0 ? 'bg-blue-100 text-blue-700' : 'bg-surface-hover text-ink-secondary' %>">
                   <%= client._count.loans %>
                 </span>
               </td>

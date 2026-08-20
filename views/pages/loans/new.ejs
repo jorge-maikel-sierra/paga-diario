@@ -5,21 +5,21 @@
   <!-- Encabezado de página -->
   <div class="flex items-center gap-2">
     <a href="/admin/loans"
-       class="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-brand-navy transition-colors">
+       class="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink transition-colors">
       ← Volver a préstamos
     </a>
   </div>
 
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
     <div>
-      <h1 class="text-2xl font-bold text-brand-navy">Nuevo Préstamo</h1>
-      <p class="text-sm text-gray-500 mt-1">Completa los datos para registrar y calcular un préstamo.</p>
+      <h1 class="text-2xl font-bold text-ink">Nuevo Préstamo</h1>
+      <p class="text-sm text-ink-secondary mt-1">Completa los datos para registrar y calcular un préstamo.</p>
     </div>
   </div>
 
   <!-- Errores de validación -->
   <% if (Array.isArray(validationErrors) && validationErrors.length > 0) { %>
-    <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+    <div class="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">
       <p class="font-semibold mb-2">Por favor corrige los siguientes campos:</p>
       <ul class="list-disc list-inside space-y-1">
         <% validationErrors.forEach(function(err) { %>
@@ -33,11 +33,11 @@
   <form id="loan-form"
         method="POST"
         action="/admin/loans"
-        class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        class="bg-surface rounded-xl border border-line shadow-sm">
 
     <!-- ── Sección 1: Datos del solicitante ────────────────────────── -->
-    <div class="px-6 py-4 border-b border-gray-100">
-      <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+    <div class="px-6 py-4 border-b border-line-subtle">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
         Datos del solicitante
       </h2>
     </div>
@@ -60,7 +60,7 @@
           class="form-input"
         />
         <input type="hidden" id="clientId" name="clientId" value="<%= formData ? formData.clientId : '' %>" />
-        <div id="clientSuggestions" class="mt-1 bg-white border border-gray-200 rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
+        <div id="clientSuggestions" class="mt-1 bg-surface border border-line rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
         <noscript>
           <select
             id="clientId_noscript"
@@ -100,7 +100,7 @@
           class="form-input"
         />
         <input type="hidden" id="collectorId" name="collectorId" value="<%= formData ? formData.collectorId : '' %>" />
-        <div id="collectorSuggestions" class="mt-1 bg-white border border-gray-200 rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
+        <div id="collectorSuggestions" class="mt-1 bg-surface border border-line rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
         <noscript>
           <select
             id="collectorId_noscript"
@@ -127,7 +127,7 @@
       <div>
         <label for="routeSearch" class="form-label">
           Ruta de cobro
-          <span class="text-xs text-gray-400 font-normal">(opcional)</span>
+          <span class="text-xs text-ink-muted font-normal">(opcional)</span>
         </label>
         <input
           id="routeSearch"
@@ -139,7 +139,7 @@
           class="form-input"
         />
         <input type="hidden" id="routeId" name="routeId" value="<%= formData ? formData.routeId : '' %>" />
-        <div id="routeSuggestions" class="mt-1 bg-white border border-gray-200 rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
+        <div id="routeSuggestions" class="mt-1 bg-surface border border-line rounded-md shadow-sm hidden max-h-60 overflow-auto text-sm"></div>
         <noscript>
           <select
             id="routeId_noscript"
@@ -157,8 +157,8 @@
     </div>
 
     <!-- ── Sección 2: Condiciones del préstamo ─────────────────────── -->
-    <div class="px-6 py-4 border-t border-b border-gray-100">
-      <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+    <div class="px-6 py-4 border-t border-b border-line-subtle">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
         Condiciones del préstamo
       </h2>
     </div>
@@ -169,7 +169,7 @@
           Capital prestado (COP) <span class="text-red-500">*</span>
         </label>
         <div class="relative">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 text-sm pointer-events-none">
+          <span class="absolute inset-y-0 left-3 flex items-center text-ink-muted text-sm pointer-events-none">
             $
           </span>
           <input
@@ -205,7 +205,7 @@
             required
             class="form-input pr-8"
           />
-          <span class="absolute inset-y-0 right-3 flex items-center text-gray-400 text-sm pointer-events-none">
+          <span class="absolute inset-y-0 right-3 flex items-center text-ink-muted text-sm pointer-events-none">
             %
           </span>
         </div>
@@ -252,7 +252,7 @@
             required
             class="form-input pr-16"
           />
-          <span class="absolute inset-y-0 right-3 flex items-center text-gray-400 text-sm pointer-events-none">
+          <span class="absolute inset-y-0 right-3 flex items-center text-ink-muted text-sm pointer-events-none">
             mes(es)
           </span>
         </div>
@@ -283,7 +283,7 @@
     <div class="px-6 pb-6">
       <label for="notes" class="form-label">
         Notas internas
-        <span class="text-xs text-gray-400 font-normal">(opcional)</span>
+        <span class="text-xs text-ink-muted font-normal">(opcional)</span>
       </label>
       <textarea
         id="notes"
@@ -295,14 +295,14 @@
     </div>
 
     <!-- ── Botones de acción ────────────────────────────────────────── -->
-    <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="px-6 py-4 border-t border-line-subtle flex flex-col sm:flex-row items-center justify-between gap-3">
 
       <!-- Calcular previsualización (AJAX, no envía el formulario) -->
       <button
         type="button"
         id="btn-preview"
         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3
-               rounded-lg border border-brand-navy text-brand-navy text-sm font-semibold
+               rounded-lg border border-brand-navy text-ink text-sm font-semibold
                hover:bg-brand-navy hover:text-white transition-colors"
       >
         🔢 Calcular previsualización

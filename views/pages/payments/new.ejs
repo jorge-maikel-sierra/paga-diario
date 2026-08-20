@@ -98,7 +98,7 @@ function todayISO() {
             Monto Recibido <span class="text-red-500">*</span>
           </label>
           <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted text-sm">$</span>
             <input
               type="number"
               id="amountPaid"
@@ -187,7 +187,7 @@ function todayISO() {
       </div>
 
       <!-- Botones -->
-      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-line-subtle">
         <button type="submit" id="btn-submit"
                 class="flex-1 btn-primary justify-center">
           💰 Registrar Recaudo
@@ -206,9 +206,9 @@ function todayISO() {
 
       <!-- Cuota pendiente activa -->
       <div id="panel-installment"
-           class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hidden">
-        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+           class="bg-surface rounded-xl border border-line shadow-sm overflow-hidden hidden">
+        <div class="px-5 py-3 border-b border-line-subtle flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
             📋 Cuota Pendiente
           </h2>
           <span id="installment-badge"
@@ -216,111 +216,111 @@ function todayISO() {
             #<span id="inst-number">—</span>
           </span>
         </div>
-        <dl class="divide-y divide-gray-50 text-sm">
+        <dl class="divide-y divide-line-subtle text-sm">
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">Vencimiento</dt>
-            <dd id="inst-due-date" class="font-medium text-gray-800">—</dd>
+            <dt class="text-ink-secondary">Vencimiento</dt>
+            <dd id="inst-due-date" class="font-medium text-ink">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">Interés de la cuota</dt>
+            <dt class="text-ink-secondary">Interés de la cuota</dt>
             <dd id="inst-interest" class="font-medium text-blue-600 tabular-nums">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">Capital de la cuota</dt>
-            <dd id="inst-principal" class="font-medium text-gray-800 tabular-nums">—</dd>
+            <dt class="text-ink-secondary">Capital de la cuota</dt>
+            <dd id="inst-principal" class="font-medium text-ink tabular-nums">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">Total cuota</dt>
-            <dd id="inst-total" class="font-bold text-brand-navy tabular-nums">—</dd>
+            <dt class="text-ink-secondary">Total cuota</dt>
+            <dd id="inst-total" class="font-bold text-ink tabular-nums">—</dd>
           </div>
           <div id="row-mora" class="flex justify-between px-5 py-2.5 hidden">
-            <dt class="text-gray-500">⚠️ Mora pendiente</dt>
+            <dt class="text-ink-secondary">⚠️ Mora pendiente</dt>
             <dd id="inst-mora" class="font-medium text-red-600 tabular-nums">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">Saldo total préstamo</dt>
-            <dd id="inst-outstanding" class="font-semibold text-gray-800 tabular-nums">—</dd>
+            <dt class="text-ink-secondary">Saldo total préstamo</dt>
+            <dd id="inst-outstanding" class="font-semibold text-ink tabular-nums">—</dd>
           </div>
-          <div class="flex justify-between px-5 py-2.5 bg-teal-50">
-            <dt class="text-teal-700 font-medium">💳 Liquidar hoy</dt>
-            <dd id="inst-payoff" class="font-bold text-teal-700 tabular-nums">—</dd>
+          <div class="flex justify-between px-5 py-2.5 bg-teal-500/10">
+            <dt class="text-teal-600 font-medium">💳 Liquidar hoy</dt>
+            <dd id="inst-payoff" class="font-bold text-teal-600 tabular-nums">—</dd>
           </div>
         </dl>
       </div>
 
       <!-- Desglose del pago (se recalcula al tipear el monto) -->
       <div id="panel-split"
-           class="bg-white rounded-xl border-2 border-brand-green shadow-sm overflow-hidden hidden">
-        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-brand-navy uppercase tracking-wide">
+           class="bg-surface rounded-xl border-2 border-brand-green shadow-sm overflow-hidden hidden">
+        <div class="px-5 py-3 border-b border-line-subtle flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
             🔢 Desglose del Pago
           </h2>
           <!-- Tipo de pago detectado -->
           <span id="payment-type-badge"
-                class="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
+                class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-hover text-ink-secondary">
             —
           </span>
         </div>
-        <dl class="divide-y divide-gray-50 text-sm">
+        <dl class="divide-y divide-line-subtle text-sm">
           <div id="row-split-mora" class="flex justify-between px-5 py-2.5 hidden">
-            <dt class="text-gray-500">→ Mora cubierta</dt>
+            <dt class="text-ink-secondary">→ Mora cubierta</dt>
             <dd id="split-mora" class="font-medium text-red-600 tabular-nums">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">→ Interés aplicado</dt>
+            <dt class="text-ink-secondary">→ Interés aplicado</dt>
             <dd id="split-interest" class="font-medium text-blue-600 tabular-nums">—</dd>
           </div>
           <div class="flex justify-between px-5 py-2.5">
-            <dt class="text-gray-500">→ Capital aplicado</dt>
-            <dd id="split-principal" class="font-medium text-gray-800 tabular-nums">—</dd>
+            <dt class="text-ink-secondary">→ Capital aplicado</dt>
+            <dd id="split-principal" class="font-medium text-ink tabular-nums">—</dd>
           </div>
           <div id="row-split-excess" class="flex justify-between px-5 py-2.5 hidden">
-            <dt class="text-gray-500">→ Abono a capital</dt>
+            <dt class="text-ink-secondary">→ Abono a capital</dt>
             <dd id="split-excess" class="font-medium text-purple-600 tabular-nums">—</dd>
           </div>
         </dl>
 
         <!-- Preview de condonación por pago anticipado -->
-        <div id="forgiveness-preview" class="px-5 py-3 bg-green-50 border-t border-gray-100 hidden">
+        <div id="forgiveness-preview" class="px-5 py-3 bg-success/10 border-t border-line-subtle hidden">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-semibold text-green-800 uppercase tracking-wide">
+            <h3 class="text-xs font-semibold text-success uppercase tracking-wide">
               💰 Condonación por Pago Anticipado
             </h3>
-            <span id="forgiveness-badge" class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+            <span id="forgiveness-badge" class="badge-success">
               —
             </span>
           </div>
           <div class="space-y-1 text-xs">
             <div class="flex justify-between">
-              <span class="text-green-700">Interés condonado:</span>
-              <span id="forgiveness-amount" class="font-semibold text-green-800 tabular-nums">—</span>
+              <span class="text-success">Interés condonado:</span>
+              <span id="forgiveness-amount" class="font-semibold text-success tabular-nums">—</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-green-700">Cuotas afectadas:</span>
-              <span id="forgiveness-installments" class="font-medium text-green-800">—</span>
+              <span class="text-success">Cuotas afectadas:</span>
+              <span id="forgiveness-installments" class="font-medium text-success">—</span>
             </div>
-            <p id="forgiveness-explanation" class="text-green-600 leading-relaxed mt-2">—</p>
+            <p id="forgiveness-explanation" class="text-success leading-relaxed mt-2">—</p>
           </div>
         </div>
 
         <!-- Descripción del efecto del pago -->
-        <div id="payment-effect" class="px-5 py-3 bg-gray-50 border-t border-gray-100">
-          <p id="effect-text" class="text-xs text-gray-600 leading-relaxed">—</p>
+        <div id="payment-effect" class="px-5 py-3 bg-app border-t border-line-subtle">
+          <p id="effect-text" class="text-xs text-ink-secondary leading-relaxed">—</p>
         </div>
       </div>
 
       <!-- Estado vacío: no hay cuota pendiente -->
       <div id="panel-no-installment"
-           class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 hidden">
-        <p class="text-sm font-medium text-amber-800">
+           class="bg-warning/10 border border-warning/20 rounded-xl px-5 py-4 hidden">
+        <p class="text-sm font-medium text-warning">
           ✅ Este préstamo no tiene cuotas pendientes.
         </p>
       </div>
 
       <!-- Instrucción inicial -->
       <div id="panel-placeholder"
-           class="bg-gray-50 border border-dashed border-gray-200 rounded-xl px-5 py-8 text-center">
-        <p class="text-sm text-gray-400">
+           class="bg-app border border-dashed border-line rounded-xl px-5 py-8 text-center">
+        <p class="text-sm text-ink-muted">
           Selecciona un préstamo para ver<br>el desglose de la cuota pendiente.
         </p>
       </div>
@@ -478,7 +478,7 @@ function todayISO() {
     },
     PAYOFF: {
       label : '🎉 Liquidación total',
-      badge : 'bg-teal-100 text-teal-700',
+      badge : 'bg-teal-100 text-teal-600',
       effect: 'El pago cubre todo el saldo pendiente. El préstamo queda COMPLETADO y las cuotas restantes se cancelan.',
     },
   };
@@ -501,7 +501,7 @@ function todayISO() {
 
     const split = calcSplit(amount, mora, interest, principal);
     const type  = classifyPayment(split, interest, principal, outstanding);
-    const info  = TYPE_INFO[type] || { label: type, badge: 'bg-gray-100 text-gray-600', effect: '' };
+    const info  = TYPE_INFO[type] || { label: type, badge: 'bg-surface-hover text-ink-secondary', effect: '' };
 
     // Badge de tipo
     typeBadge.textContent = info.label;
