@@ -37,10 +37,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", 'cdn.tailwindcss.com'],
-        styleSrc: ["'self'", "'unsafe-inline'", 'cdn.tailwindcss.com', 'fonts.googleapis.com'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'cdn.tailwindcss.com', 'unpkg.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'cdn.tailwindcss.com', 'fonts.googleapis.com', 'unpkg.com'],
         fontSrc: ["'self'", 'fonts.gstatic.com', 'data:'],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', '*.tile.openstreetmap.org', 'unpkg.com'],
         connectSrc: ["'self'", 'ws:', 'wss:'],
       },
     },

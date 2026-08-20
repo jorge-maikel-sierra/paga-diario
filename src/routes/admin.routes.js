@@ -9,6 +9,7 @@ import {
   getRoutes,
   getNewRoute,
   createRoute,
+  getRouteDetail,
   getEditRoute,
   updateRoute,
   getSettings,
@@ -70,6 +71,7 @@ router.get('/routes/new', getNewRoute);
 router.post('/routes', createRoute);
 router.get('/routes/:id/edit', getEditRoute);
 router.put('/routes/:id', updateRoute);
+router.get('/routes/:id', getRouteDetail);
 
 // --- Configuración ---
 router.get('/settings', getSettings);

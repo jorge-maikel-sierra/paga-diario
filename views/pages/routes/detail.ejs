@@ -1,0 +1,179 @@
+<%
+  const clientsWithCoords = route.clients.filter((c) => c.latitude != null && c.longitude != null);
+%>
+<%- include('../../layouts/header') %>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<div class="p-4 sm:p-6 lg:p-8 space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div class="flex items-start gap-3">
+      <a href="/admin/routes" class="btn-back mt-0.5">←</a>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="page-title"><%= route.name %></h1>
+          <% if (route.isActive) { %>
+            <span class="badge-success">● Activa</span>
+          <% } else { %>
+            <span class="badge-neutral">● Inactiva</span>
+          <% } %>
+        </div>
+        <% if (route.description) { %>
+          <p class="page-subtitle"><%= route.description %></p>
+        <% } %>
+        <p class="text-sm text-ink-secondary mt-1">
+          <% if (route.collector) { %>
+            🧑‍💼 Cobrador: <span class="text-ink font-medium"><%= route.collector.firstName %> <%= route.collector.lastName %></span>
+          <% } else { %>
+            <span class="badge-warning">⚠ Sin cobrador asignado</span>
+          <% } %>
+        </p>
+      </div>
+    </div>
+    <a href="/admin/routes/<%= route.id %>/edit" class="btn-secondary whitespace-nowrap">
+      ✏️ Editar ruta
+    </a>
+  </div>
+
+  <!-- Mapa -->
+  <div class="card overflow-hidden">
+    <div class="px-5 py-3 border-b border-line-subtle flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">📍 Mapa de clientes</h2>
+      <span class="text-xs text-ink-muted">
+        <%= clientsWithCoords.length %> de <%= route.clients.length %> con ubicación registrada
+      </span>
+    </div>
+
+    <% if (clientsWithCoords.length === 0) { %>
+      <div class="py-16 text-center">
+        <span class="text-4xl block mb-3">🗺️</span>
+        <p class="text-sm font-medium text-ink-secondary">Ningún cliente de esta ruta tiene coordenadas registradas</p>
+        <p class="text-xs text-ink-muted mt-1">Agregá latitud y longitud al editar un cliente para verlo en el mapa.</p>
+      </div>
+    <% } else { %>
+      <div id="route-map" class="h-[420px] w-full"></div>
+    <% } %>
+  </div>
+
+  <!-- Listado de clientes -->
+  <div class="card overflow-hidden">
+    <div class="px-5 py-3 border-b border-line-subtle">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wide">
+        👥 Clientes de la ruta (<%= route.clients.length %>)
+      </h2>
+    </div>
+
+    <% if (route.clients.length === 0) { %>
+      <div class="py-16 text-center">
+        <span class="text-4xl block mb-3">👥</span>
+        <p class="text-sm font-medium text-ink-secondary">Esta ruta todavía no tiene clientes asignados</p>
+      </div>
+    <% } else { %>
+      <div class="overflow-x-auto">
+        <table class="table-base">
+          <thead>
+            <tr>
+              <th class="text-left">Cliente</th>
+              <th class="text-left">Teléfono</th>
+              <th class="text-left">Dirección</th>
+              <th class="text-center">Préstamos</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Ubicación</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% route.clients.forEach((client) => { %>
+              <tr
+                <% if (client.latitude != null && client.longitude != null) { %>
+                  class="cursor-pointer" data-lat="<%= client.latitude %>" data-lng="<%= client.longitude %>"
+                <% } %>
+              >
+                <td>
+                  <p class="font-medium text-ink"><%= client.firstName %> <%= client.lastName %></p>
+                  <% if (client.businessName) { %>
+                    <p class="text-xs text-ink-muted"><%= client.businessName %></p>
+                  <% } %>
+                </td>
+                <td class="text-ink-secondary"><%= client.phone || '—' %></td>
+                <td class="text-ink-secondary"><%= client.address || '—' %></td>
+                <td class="text-center">
+                  <span class="badge-neutral"><%= client._count.loans %></span>
+                </td>
+                <td class="text-center">
+                  <% if (client.isActive) { %>
+                    <span class="badge-success">● Activo</span>
+                  <% } else { %>
+                    <span class="badge-neutral">● Inactivo</span>
+                  <% } %>
+                </td>
+                <td class="text-center">
+                  <% if (client.latitude != null && client.longitude != null) { %>
+                    <span class="text-brand" title="Ver en el mapa">📍</span>
+                  <% } else { %>
+                    <span class="text-ink-muted">—</span>
+                  <% } %>
+                </td>
+                <td class="text-right">
+                  <a href="/admin/clients/<%= client.id %>" class="text-brand text-xs font-semibold hover:underline whitespace-nowrap">
+                    Ver perfil →
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</div>
+
+<% if (clientsWithCoords.length > 0) { %>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  (function () {
+    const points = <%- JSON.stringify(clientsWithCoords.map((c) => ({
+      id: c.id,
+      lat: Number(c.latitude),
+      lng: Number(c.longitude),
+      name: `${c.firstName} ${c.lastName}`,
+      address: c.address || '',
+    }))) %>;
+
+    const map = L.map('route-map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const markers = {};
+    points.forEach((p) => {
+      const marker = L.marker([p.lat, p.lng]).addTo(map)
+        .bindPopup(`<strong>${p.name}</strong><br>${p.address}`);
+      markers[p.id] = marker;
+    });
+
+    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng]));
+    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
+
+    // Clic en una fila de la tabla -> centra el mapa y abre el popup del cliente
+    document.querySelectorAll('tr[data-lat][data-lng]').forEach((row) => {
+      row.addEventListener('click', () => {
+        const lat = parseFloat(row.dataset.lat);
+        const lng = parseFloat(row.dataset.lng);
+        map.setView([lat, lng], 16, { animate: true });
+        document.getElementById('route-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const match = points.find((p) => p.lat === lat && p.lng === lng);
+        if (match && markers[match.id]) markers[match.id].openPopup();
+      });
+    });
+  })();
+</script>
+<% } %>
+
+<%- include('../../layouts/footer') %>

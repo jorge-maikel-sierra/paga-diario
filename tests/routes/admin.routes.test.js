@@ -28,6 +28,7 @@ const mockCreatePayment = jest.fn((req, res) => res.status(200).end());
 const mockGetRoutes = jest.fn((req, res) => res.status(200).end());
 const mockGetNewRoute = jest.fn((req, res) => res.status(200).end());
 const mockCreateRoute = jest.fn((req, res) => res.status(200).end());
+const mockGetRouteDetail = jest.fn((req, res) => res.status(200).end());
 const mockGetEditRoute = jest.fn((req, res) => res.status(200).end());
 const mockUpdateRoute = jest.fn((req, res) => res.status(200).end());
 const mockGetReports = jest.fn((req, res) => res.status(200).end());
@@ -74,6 +75,7 @@ jest.unstable_mockModule('../../src/controllers/admin.controller.js', () => ({
   getRoutes: mockGetRoutes,
   getNewRoute: mockGetNewRoute,
   createRoute: mockCreateRoute,
+  getRouteDetail: mockGetRouteDetail,
   getEditRoute: mockGetEditRoute,
   updateRoute: mockUpdateRoute,
   getReports: mockGetReports,
@@ -377,6 +379,12 @@ describe('admin.routes', () => {
         .expect(200);
 
       expect(mockUpdateRoute).toHaveBeenCalled();
+    });
+
+    it('GET /admin/routes/:id calls getRouteDetail', async () => {
+      await request(app).get('/admin/routes/xyz').set('x-test-session', adminSession).expect(200);
+
+      expect(mockGetRouteDetail).toHaveBeenCalled();
     });
   });
 

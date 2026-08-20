@@ -763,6 +763,23 @@ const getRoutes = asyncHandler(async (req, res) => {
 });
 
 /**
+ * GET /admin/routes/:id
+ * Detalle de una ruta: clientes asignados y mapa con sus ubicaciones.
+ */
+const getRouteDetail = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const route = await routeService.findRouteWithClients(id, req.user.organizationId);
+
+  return res.render('pages/routes/detail', {
+    title: route.name,
+    user: req.user,
+    currentPath: '/admin/routes',
+    route,
+  });
+});
+
+/**
  * GET /admin/routes/new
  * Renderiza el formulario para crear una nueva ruta de cobro.
  */
@@ -1250,6 +1267,7 @@ export {
   getNewPayment,
   createPayment,
   getRoutes,
+  getRouteDetail,
   getNewRoute,
   createRoute,
   getEditRoute,

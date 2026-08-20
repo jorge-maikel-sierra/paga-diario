@@ -118,6 +118,53 @@ export const findRouteById = async (id, organizationId) => {
 };
 
 /**
+ * Obtiene una ruta con su cobrador y sus clientes (incluye coordenadas
+ * para el mapa). Verifica que pertenezca a la organización.
+ *
+ * @param {string} id
+ * @param {string} organizationId
+ * @returns {Promise<import('@prisma/client').Route>}
+ */
+export const findRouteWithClients = async (id, organizationId) => {
+  const route = await prisma.route.findFirst({
+    where: { id, organizationId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isActive: true,
+      collector: {
+        select: { id: true, firstName: true, lastName: true, phone: true },
+      },
+      clients: {
+        orderBy: { firstName: 'asc' },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          address: true,
+          businessName: true,
+          latitude: true,
+          longitude: true,
+          isActive: true,
+          _count: { select: { loans: true } },
+        },
+      },
+    },
+  });
+
+  if (!route) {
+    const err = new Error('Ruta no encontrada');
+    err.statusCode = 404;
+    err.isOperational = true;
+    throw err;
+  }
+
+  return route;
+};
+
+/**
  * Actualiza una ruta verificando organización.
  *
  * @param {string} id
