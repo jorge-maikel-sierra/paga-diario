@@ -87,5 +87,12 @@
     "prettier": "3.3.2",
     "supertest": "^7.2.2",
     "xlsx": "^0.18.5"
+  },
+  "allowScripts": {
+    "@prisma/client@5.14.0": true,
+    "@prisma/engines@5.14.0": true,
+    "bcrypt@6.0.0": true,
+    "msgpackr-extract@3.0.3": true,
+    "prisma@5.14.0": true
   }
 }

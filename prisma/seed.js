@@ -225,7 +225,7 @@ const seed = async () => {
   const clients = [];
   for (const data of clientsData) {
     const client = await prisma.client.create({
-      data: { documentType: 'CC', ...data },
+      data: { organizationId: org.id, documentType: 'CC', ...data },
     });
     clients.push(client);
   }
