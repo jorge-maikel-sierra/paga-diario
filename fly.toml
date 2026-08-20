@@ -3,7 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'pago-ya'
+app = 'paga-diario'
 primary_region = 'iad'
 
 [build]
@@ -12,7 +12,7 @@ primary_region = 'iad'
   # rolling en lugar de bluegreen porque un único volumen no puede ser montado
   # simultáneamente por dos máquinas (restricción de Fly.io con volúmenes persistentes)
   strategy = 'rolling'
-  release_command = 'npm run db:migrate:prod && npx prisma generate --accelerate'
+  release_command = 'npm run db:migrate:prod'
 
 [env]
   NODE_ENV = 'production'
