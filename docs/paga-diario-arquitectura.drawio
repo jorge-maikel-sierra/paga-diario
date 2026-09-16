@@ -1,0 +1,238 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="76Etl8tzO0mRf_HA1iNG">
+    <mxGraphModel dx="1557" dy="1073" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" value="Paga Diario — Arquitectura (Node.js/Express + Prisma + BullMQ)" vertex="1">
+          <mxGeometry height="30" width="1040" x="60" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Panel Admin (EJS)&lt;br&gt;Browser + cookie session" vertex="1">
+          <mxGeometry height="60" width="220" x="100" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="App móvil de cobradores&lt;br&gt;(cliente REST, sync offline de pagos)" vertex="1">
+          <mxGeometry height="60" width="260" x="380" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Express App&lt;br&gt;src/app.js — monta /admin y /api/v1" vertex="1">
+          <mxGeometry height="60" width="420" x="180" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" value="verifySession&lt;br&gt;middleware/auth.session.js&lt;br&gt;(express-session + connect-pg-simple)" vertex="1">
+          <mxGeometry height="70" width="190" x="60" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" value="verifyToken&lt;br&gt;middleware/auth.api.js&lt;br&gt;(JWT bearer)" vertex="1">
+          <mxGeometry height="70" width="190" x="270" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" value="authorize.js&lt;br&gt;role guard&lt;br&gt;(SUPER_ADMIN / ADMIN / COLLECTOR)" vertex="1">
+          <mxGeometry height="70" width="170" x="480" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;" value="validate.js&lt;br&gt;Zod schemas/" vertex="1">
+          <mxGeometry height="70" width="170" x="670" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" value="/admin/*&lt;br&gt;admin.*.routes.js" vertex="1">
+          <mxGeometry height="70" width="250" x="60" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" value="/api/v1/*&lt;br&gt;payment.routes.js, user.routes.js" vertex="1">
+          <mxGeometry height="70" width="250" x="330" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" value="/auth&lt;br&gt;auth.routes.js" vertex="1">
+          <mxGeometry height="70" width="200" x="600" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#b0e3e6;strokeColor=#0b8299;" value="Controllers (thin, envueltos en asyncHandler)&lt;br&gt;admin · auth · health · import · marketing · payment · report · user" vertex="1">
+          <mxGeometry height="90" width="740" x="60" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="n12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" value="Services (lógica de negocio + acceso a Prisma)&lt;br&gt;client · loan · payment · import · mora · organization&lt;br&gt;collector · expense · report · user · notification&lt;br&gt;telegram · pdf · excel · health · route" vertex="1">
+          <mxGeometry height="120" width="460" x="60" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="n13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;dashed=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="engine/ (puro, sin Prisma, testeable)&lt;br&gt;amortization.js&lt;br&gt;mora.js&lt;br&gt;payment-split.js&lt;br&gt;usury.js" vertex="1">
+          <mxGeometry height="120" width="250" x="550" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="note1" parent="1" style="text;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;fontStyle=2;" value="Multi-tenancy: cada servicio filtra por organizationId (req.user) en código — no hay RLS a nivel de base de datos.&lt;br&gt;Dinero siempre como Decimal(14,2) via decimal.js (parseFloat/parseInt prohibidos por ESLint)." vertex="1">
+          <mxGeometry height="30" width="740" x="60" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="n14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Prisma Client&lt;br&gt;config/prisma.js" vertex="1">
+          <mxGeometry height="70" width="200" x="150" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="n15" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fontSize=12;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="90" width="160" x="410" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="n19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" value="Socket.io&lt;br&gt;config/socket.js — tiempo real" vertex="1">
+          <mxGeometry height="60" width="260" x="870" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="n16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" value="BullMQ Jobs (jobs/)&lt;br&gt;importWorker · moraWorker&lt;br&gt;pdfWorker · telegramWorker&lt;br&gt;mora.scheduler (cron)" vertex="1">
+          <mxGeometry height="120" width="260" x="870" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="n17" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fontSize=11;fillColor=#f8cecc;strokeColor=#b85450;" value="Redis&lt;br&gt;REDIS_URL — si falta, jobs quedan deshabilitados (modo &quot;free plan&quot;)" vertex="1">
+          <mxGeometry height="90" width="260" x="870" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="n18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="Telegram Bot API&lt;br&gt;(comprobantes de pago)" vertex="1">
+          <mxGeometry height="60" width="260" x="870" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="n1" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="135" />
+              <mxPoint x="390" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n2" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="510" y="135" />
+              <mxPoint x="390" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n3" style="fontSize=10;dashed=1;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n4" value="autentica">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="155" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n3" style="fontSize=10;dashed=1;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n5" value="autentica">
+          <mxGeometry relative="1" x="0.3335" y="-9" as="geometry">
+            <mxPoint x="7" y="-9" as="offset" />
+            <Array as="points">
+              <mxPoint x="390" y="245" />
+              <mxPoint x="365" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n3" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n19">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n4" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="155" y="365" />
+              <mxPoint x="185" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n5" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="370" />
+              <mxPoint x="455" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n3" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n10" value="públicas">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="245" />
+              <mxPoint x="856" y="245" />
+              <mxPoint x="856" y="364" />
+              <mxPoint x="700" y="364" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n8" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="185" y="356" />
+              <mxPoint x="565" y="356" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="n9" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="455" y="360" />
+              <mxPoint x="755" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="n6" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="565" y="373" />
+              <mxPoint x="816" y="373" />
+              <mxPoint x="816" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="n7" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="755" y="369" />
+              <mxPoint x="829" y="369" />
+              <mxPoint x="829" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="n10" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="485" />
+              <mxPoint x="430" y="485" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="n11" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="618" />
+              <mxPoint x="290" y="618" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="n12" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n13" value="usa">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="290" y="624" />
+              <mxPoint x="675" y="624" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="n12" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n14">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="44" y="700" />
+              <mxPoint x="44" y="845" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="n14" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="n12" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n16" value="encola">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="290" y="621" />
+              <mxPoint x="841" y="621" />
+              <mxPoint x="841" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="n16" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="n16" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n14" value="escribe resultados">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="854" y="450" />
+              <mxPoint x="854" y="906" />
+              <mxPoint x="250" y="906" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="n16" style="fontSize=10;edgeStyle=orthogonalEdgeStyle;rounded=0;libavoidRouting=1;orthogonalLoop=1;jettySize=auto;html=1;" target="n18" value="telegramWorker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1146" y="450" />
+              <mxPoint x="1146" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
